@@ -1,24 +1,16 @@
-# README
+# Listen Along
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Listen along to music with your friends through Spotify.
 
-Things you may want to cover:
+# Test
 
-* Ruby version
+```bash
+rspec
+```
 
-* System dependencies
+# Run
 
-* Configuration
+```bash
+rails s
+```
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...

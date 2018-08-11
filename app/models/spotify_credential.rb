@@ -1,0 +1,2 @@
+class SpotifyCredential < ApplicationRecord
+end

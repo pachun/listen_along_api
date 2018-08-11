@@ -1,0 +1,46 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://api.spotify.com/v1/me/player/currently-playing
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.15.2
+      Authorization:
+      - Bearer no_song_playing_access_token
+  response:
+    status:
+      code: 204
+      message: No Content
+    headers:
+      cache-control:
+      - private, max-age=0
+      access-control-allow-origin:
+      - "*"
+      access-control-allow-headers:
+      - Accept, Authorization, Origin, Content-Type, Retry-After
+      access-control-allow-methods:
+      - GET, POST, OPTIONS, PUT, DELETE, PATCH
+      access-control-allow-credentials:
+      - 'true'
+      access-control-max-age:
+      - '604800'
+      content-length:
+      - '0'
+      date:
+      - Sun, 12 Aug 2018 06:00:17 GMT
+      via:
+      - 1.1 google
+      alt-svc:
+      - clear
+      connection:
+      - close
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Sun, 12 Aug 2018 06:00:17 GMT
+recorded_with: VCR 4.0.0

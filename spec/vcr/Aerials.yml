@@ -1,0 +1,122 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://api.spotify.com/v1/me/player/currently-playing
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Faraday v0.15.2
+      Authorization:
+      - Bearer aerials_access_token
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      content-type:
+      - application/json; charset=utf-8
+      cache-control:
+      - private, max-age=0
+      access-control-allow-origin:
+      - "*"
+      access-control-allow-headers:
+      - Accept, Authorization, Origin, Content-Type, Retry-After
+      access-control-allow-methods:
+      - GET, POST, OPTIONS, PUT, DELETE, PATCH
+      access-control-allow-credentials:
+      - 'true'
+      access-control-max-age:
+      - '604800'
+      date:
+      - Sat, 11 Aug 2018 22:30:04 GMT
+      via:
+      - 1.1 google
+      alt-svc:
+      - clear
+      connection:
+      - close
+      transfer-encoding:
+      - chunked
+    body:
+      encoding: ASCII-8BIT
+      string: |-
+        {
+          "timestamp" : 1534026571619,
+          "context" : null,
+          "progress_ms" : 33297,
+          "item" : {
+            "album" : {
+              "album_type" : "album",
+              "artists" : [ {
+                "external_urls" : {
+                  "spotify" : "https://open.spotify.com/artist/3ff1CmU6qfTqRAmdrq8EEG"
+                },
+                "href" : "https://api.spotify.com/v1/artists/3ff1CmU6qfTqRAmdrq8EEG",
+                "id" : "3ff1CmU6qfTqRAmdrq8EEG",
+                "name" : "Lights & Motion",
+                "type" : "artist",
+                "uri" : "spotify:artist:3ff1CmU6qfTqRAmdrq8EEG"
+              } ],
+              "available_markets" : [ "AD", "AR", "AT", "AU", "BE", "BG", "BO", "BR", "CA", "CH", "CL", "CO", "CR", "CY", "CZ", "DE", "DK", "DO", "EC", "EE", "ES", "FI", "FR", "GB", "GR", "GT", "HK", "HN", "HU", "ID", "IE", "IL", "IS", "IT", "JP", "LI", "LT", "LU", "LV", "MC", "MT", "MX", "MY", "NI", "NL", "NO", "NZ", "PA", "PE", "PH", "PL", "PT", "PY", "RO", "SE", "SG", "SK", "SV", "TH", "TR", "TW", "US", "UY", "VN", "ZA" ],
+              "external_urls" : {
+                "spotify" : "https://open.spotify.com/album/6L0fhAi5G9zXbmFelO96Zy"
+              },
+              "href" : "https://api.spotify.com/v1/albums/6L0fhAi5G9zXbmFelO96Zy",
+              "id" : "6L0fhAi5G9zXbmFelO96Zy",
+              "images" : [ {
+                "height" : 640,
+                "url" : "https://i.scdn.co/image/7ab6298fdaa66b923a8c99f0f83360c05a6f2960",
+                "width" : 640
+              }, {
+                "height" : 300,
+                "url" : "https://i.scdn.co/image/3d71556c636504550607b6e5adb439855788d084",
+                "width" : 300
+              }, {
+                "height" : 64,
+                "url" : "https://i.scdn.co/image/5377b618fdae1be9bf4d15509ade74247dba7319",
+                "width" : 64
+              } ],
+              "name" : "Reanimation",
+              "release_date" : "2013-01-15",
+              "release_date_precision" : "day",
+              "type" : "album",
+              "uri" : "spotify:album:6L0fhAi5G9zXbmFelO96Zy"
+            },
+            "artists" : [ {
+              "external_urls" : {
+                "spotify" : "https://open.spotify.com/artist/3ff1CmU6qfTqRAmdrq8EEG"
+              },
+              "href" : "https://api.spotify.com/v1/artists/3ff1CmU6qfTqRAmdrq8EEG",
+              "id" : "3ff1CmU6qfTqRAmdrq8EEG",
+              "name" : "Lights & Motion",
+              "type" : "artist",
+              "uri" : "spotify:artist:3ff1CmU6qfTqRAmdrq8EEG"
+            } ],
+            "available_markets" : [ "AD", "AR", "AT", "AU", "BE", "BG", "BO", "BR", "CA", "CH", "CL", "CO", "CR", "CY", "CZ", "DE", "DK", "DO", "EC", "EE", "ES", "FI", "FR", "GB", "GR", "GT", "HK", "HN", "HU", "ID", "IE", "IL", "IS", "IT", "JP", "LI", "LT", "LU", "LV", "MC", "MT", "MX", "MY", "NI", "NL", "NO", "NZ", "PA", "PE", "PH", "PL", "PT", "PY", "RO", "SE", "SG", "SK", "SV", "TH", "TR", "TW", "US", "UY", "VN", "ZA" ],
+            "disc_number" : 1,
+            "duration_ms" : 345741,
+            "explicit" : false,
+            "external_ids" : {
+              "isrc" : "US4KH1354603"
+            },
+            "external_urls" : {
+              "spotify" : "https://open.spotify.com/track/11wlDEdE6fV0YuRXSXMAnE"
+            },
+            "href" : "https://api.spotify.com/v1/tracks/11wlDEdE6fV0YuRXSXMAnE",
+            "id" : "11wlDEdE6fV0YuRXSXMAnE",
+            "is_local" : false,
+            "name" : "Aerials",
+            "popularity" : 31,
+            "preview_url" : "https://p.scdn.co/mp3-preview/bdb493372605f37082f9e96b81342d34df355aaa?cid=70af0abc99f4457fb3ea64dd7361dfb7",
+            "track_number" : 3,
+            "type" : "track",
+            "uri" : "spotify:track:11wlDEdE6fV0YuRXSXMAnE"
+          },
+          "is_playing" : true
+        }
+    http_version: 
+  recorded_at: Sat, 11 Aug 2018 22:30:04 GMT
+recorded_with: VCR 4.0.0
