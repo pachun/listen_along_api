@@ -12,6 +12,8 @@
 # the additional setup, and require it from the spec files that actually need
 # it.
 
+require "webmock/rspec"
+
 Dir["./spec/support/**/*.rb"].each { |f| require f }
 
 #

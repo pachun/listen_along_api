@@ -1,5 +1,5 @@
 class CurrentlyPlayingSongController < ApplicationController
   def index
-    render json: SpotifyClient.new.currently_playing_song_name
+    render json: BroadcasterSpotifyClient.new.currently_playing_song[:name]
   end
 end

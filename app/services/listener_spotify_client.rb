@@ -1,59 +1,40 @@
-class SpotifyClient
+class ListenerSpotifyClient
   SPOTIFY_AUTHORIZATION_URL = "https://accounts.spotify.com/api/token"
   SPOTIFY_API_URL = "https://api.spotify.com"
-  CURRENTLY_PLAYING_SONG_ENDPOINT = "/v1/me/player/currently-playing"
+  LISTEN_ALONG_ENDPOINT = "v1/me/player/play"
 
-  attr_reader :connection
-
-  def initialize
+  def listen_along
+    @song = BroadcasterSpotifyClient.new.currently_playing_song
     @connection = Faraday.new(SPOTIFY_API_URL) do |faraday|
       faraday.adapter(Faraday.default_adapter)
     end
-  end
 
-  def currently_playing_song_name
-    response = song_request
-
+    response = listen_along_request
     if spotify_access_token_expired?(response)
       refresh_access_token
-      response = song_request
+      response = listen_along_request
     end
-
-    song_name(response)
   end
 
   private
 
-  def song_name(song_request_response)
-    if no_song_playing?(song_request_response)
-      "No Song Playing"
-    else
-      JSON.parse(song_request_response.body)["item"]["name"]
+  def listen_along_request
+    @connection.put(LISTEN_ALONG_ENDPOINT) do |request|
+      request.headers["Authorization"] = "Bearer #{SpotifyCredential.first.access_token}"
+      request.body = {
+        "uris": ["#{@song[:uri]}"],
+        "position_ms": @song[:millisecond_progress]
+      }.to_json
     end
   end
 
-  def no_song_playing?(song_request_response)
-    no_content = 204
-    song_request_response.status == no_content
-  end
-
-  def song_request
-    connection.get(CURRENTLY_PLAYING_SONG_ENDPOINT) do |request|
-      request.headers["Authorization"] = bearer_auth_header
-    end
-  end
-
-  def bearer_auth_header
-    "Bearer #{SpotifyCredential.last.access_token}"
-  end
-
-  def spotify_access_token_expired?(song_request_response)
-    song_request_response.status == 401
+  def spotify_access_token_expired?(request)
+    request.status == 401
   end
 
   def refresh_access_token
     token = JSON.parse(request_refreshed_access_token.body)["access_token"]
-    SpotifyCredential.last.update(access_token: token)
+    SpotifyCredential.first.update(access_token: token)
   end
 
   def request_refreshed_access_token
@@ -75,7 +56,7 @@ class SpotifyClient
     Addressable::URI.new.tap do |addressable|
       addressable.query_values = {
         "grant_type" => "refresh_token",
-        "refresh_token" => SpotifyCredential.last.refresh_token,
+        "refresh_token" => SpotifyCredential.first.refresh_token,
       }
     end.query
   end
