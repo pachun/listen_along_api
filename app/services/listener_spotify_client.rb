@@ -20,7 +20,7 @@ class ListenerSpotifyClient
 
   def listen_along_request
     @connection.put(LISTEN_ALONG_ENDPOINT) do |request|
-      request.headers["Authorization"] = "Bearer #{SpotifyCredential.first.access_token}"
+      request.headers["Authorization"] = "Bearer #{SpotifyCredential.last.access_token}"
       request.body = {
         "uris": ["#{@song[:uri]}"],
         "position_ms": @song[:millisecond_progress]
@@ -34,7 +34,7 @@ class ListenerSpotifyClient
 
   def refresh_access_token
     token = JSON.parse(request_refreshed_access_token.body)["access_token"]
-    SpotifyCredential.first.update(access_token: token)
+    SpotifyCredential.last.update(access_token: token)
   end
 
   def request_refreshed_access_token
@@ -56,7 +56,7 @@ class ListenerSpotifyClient
     Addressable::URI.new.tap do |addressable|
       addressable.query_values = {
         "grant_type" => "refresh_token",
-        "refresh_token" => SpotifyCredential.first.refresh_token,
+        "refresh_token" => SpotifyCredential.last.refresh_token,
       }
     end.query
   end

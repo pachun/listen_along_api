@@ -58,7 +58,7 @@ class BroadcasterSpotifyClient
   end
 
   def bearer_auth_header
-    "Bearer #{SpotifyCredential.last.access_token}"
+    "Bearer #{SpotifyCredential.first.access_token}"
   end
 
   def spotify_access_token_expired?(song_request_response)
@@ -67,7 +67,7 @@ class BroadcasterSpotifyClient
 
   def refresh_access_token
     token = JSON.parse(request_refreshed_access_token.body)["access_token"]
-    SpotifyCredential.last.update(access_token: token)
+    SpotifyCredential.first.update(access_token: token)
   end
 
   def request_refreshed_access_token
@@ -89,7 +89,7 @@ class BroadcasterSpotifyClient
     Addressable::URI.new.tap do |addressable|
       addressable.query_values = {
         "grant_type" => "refresh_token",
-        "refresh_token" => SpotifyCredential.last.refresh_token,
+        "refresh_token" => SpotifyCredential.first.refresh_token,
       }
     end.query
   end

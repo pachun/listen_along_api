@@ -3,8 +3,10 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby "2.5.1"
 
+gem "activeadmin"
 gem "addressable"
 gem "bootsnap", ">= 1.1.0", require: false
+gem "devise"
 gem "faraday"
 gem "pg"
 gem "puma", "~> 3.11"

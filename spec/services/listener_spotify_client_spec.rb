@@ -4,6 +4,9 @@ describe ListenerSpotifyClient do
   describe "#listen_along" do
     context "the listener's spotify access token is expired" do
       it "gets a new access token then returns the song name" do
+        broadcaster_credentials = create :spotify_credential,
+          access_token: "broadcaster access token"
+
         refreshed_access_token = "refreshed access token"
         listener_credentials = create :spotify_credential,
           access_token: "expired token",
@@ -57,9 +60,6 @@ describe ListenerSpotifyClient do
             "Authorization": "Bearer #{refreshed_access_token}",
           },
         )
-
-        broadcaster_credentials = create :spotify_credential,
-          access_token: "broadcaster access token"
 
         stub_request(
           :get,
