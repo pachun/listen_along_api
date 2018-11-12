@@ -28,3 +28,6 @@
 
 # Rails environment variables
 .env
+
+# html test coverage reports
+coverage

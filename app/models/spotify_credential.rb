@@ -1,2 +1,0 @@
-class SpotifyCredential < ApplicationRecord
-end

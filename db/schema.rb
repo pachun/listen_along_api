@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_10_04_001003) do
+ActiveRecord::Schema.define(version: 2018_11_28_233830) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -41,11 +41,19 @@ ActiveRecord::Schema.define(version: 2018_10_04_001003) do
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
   end
 
-  create_table "spotify_credentials", force: :cascade do |t|
+  create_table "spotify_users", force: :cascade do |t|
     t.string "access_token"
     t.string "refresh_token"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "username"
+    t.bigint "spotify_user_id"
+    t.string "song_name"
+    t.string "song_uri"
+    t.string "millisecond_progress_into_song"
+    t.boolean "is_listening", default: false
+    t.index ["spotify_user_id"], name: "index_spotify_users_on_spotify_user_id"
   end
 
+  add_foreign_key "spotify_users", "spotify_users"
 end
