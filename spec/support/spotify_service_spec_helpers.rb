@@ -102,7 +102,10 @@ module SpotifyServiceSpecHelpers
       "https://api.spotify.com/v1/me",
     ).with( headers: { "Authorization": "Bearer #{args[:access_token]}" }).to_return(
       status: 200,
-      body: { "id": args[:spotify_username] }.to_json,
+      body: {
+        "id": args[:spotify_username],
+        "display_name": args[:full_name],
+      }.to_json,
     )
   end
 end
