@@ -177,11 +177,29 @@ class SpotifyService
     end
 
     def listener_username
-      @listener_username ||= JSON.parse(
+      return @listener_username if @listener_username.present?
+
+      if spotify_username_is_all_numerical?
+        @listener_username = full_name
+      else
+        @listener_username = spotify_username
+      end
+    end
+
+    def spotify_username
+      @spotify_username ||= username_request["id"]
+    end
+
+    def full_name
+      @full_name ||= username_request["display_name"]
+    end
+
+    def username_request
+      @username_request ||= JSON.parse(
         Faraday.get(SPOTIFY_API_URL + SPOTIFY_USERNAME_ENDPOINT) do |req|
           req.headers["Authorization"] = "Bearer #{access_token}"
         end.body
-      )["id"]
+      )
     end
 
     def spotify_user_json
@@ -199,6 +217,10 @@ class SpotifyService
           "redirect_uri": "#{ENV["API_URL"]}/spotify_authentication",
         }
       end
+    end
+
+    def spotify_username_is_all_numerical?
+      true if Float(spotify_username) rescue false
     end
   end
 end

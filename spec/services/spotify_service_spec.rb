@@ -73,6 +73,30 @@ describe SpotifyService do
       )
     end
 
+    context "the user signed up with spotify through facebook" do
+      it "saves their username as their real full name" do
+        spotify_authentication_token_request = stub_get_access_token_request(
+          authorization_code: "auth_code",
+          access_token: "access token",
+          refresh_token: "refresh token",
+        )
+        spotify_username_request = stub_spotify_username_request(
+          access_token: "access token",
+          spotify_username: "121613941",
+          full_name: "Brian Voskerijian",
+        )
+
+        SpotifyService.authenticate(using_authorization_code: "auth_code")
+
+        expect(spotify_username_request).to have_been_requested
+        expect(spotify_authentication_token_request).to have_been_requested
+        expect(SpotifyUser.last.access_token).to eq("access token")
+        expect(SpotifyUser.last.refresh_token).to eq("refresh token")
+        expect(SpotifyUser.last.username).to eq("Brian Voskerijian")
+        expect(SpotifyUser.count).to eq(1)
+      end
+    end
+
     it "creates only one spotify credential per spotify user" do
       spotify_authentication_token_request = stub_get_access_token_request(
         authorization_code: "auth_code",
