@@ -83,6 +83,18 @@ describe SpotifyService do
   end
 
   describe "#current_playback_state" do
+    it "sets [:last_song_uri] to the previous song uri" do
+      spotify_user = create :spotify_user,
+        access_token: "t1",
+        song_uri: "last song uri"
+
+      stub_get_playback_request(spotify_user)
+
+      expect(
+        SpotifyService.new(spotify_user).current_playback_state[:last_song_uri]
+      ).to eq("last song uri")
+    end
+
     context "the song 'Bone Dry' is playing" do
       context "the spotify access token has expired" do
         it "gets a new access token then returns the song name" do

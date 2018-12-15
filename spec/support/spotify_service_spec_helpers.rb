@@ -1,20 +1,20 @@
 module SpotifyServiceSpecHelpers
-  def stub_get_playback_request(spotify_user)
+  def stub_get_playback_request(spotify_user, overwrites = {})
     stub_request(
       :get,
       "https://api.spotify.com/v1/me/player/currently-playing"
     ).with(
       headers: { "Authorization": "Bearer #{spotify_user.access_token}" },
-    ).to_return(get_playback_response(spotify_user))
+    ).to_return(get_playback_response(spotify_user, overwrites))
   end
 
-  def stub_set_playback_request(listener:, broadcaster:)
+  def stub_set_playback_request(listener:, broadcaster:, overwrites: {})
     stub_request(
       :put,
       "https://api.spotify.com/v1/me/player/play"
     ).with(
       body: {
-        "uris": [broadcaster.song_uri],
+        "uris": [overwrites[:song_uri] || broadcaster.song_uri],
         "position_ms": broadcaster.millisecond_progress_into_song,
       }.to_json,
       headers: {
@@ -133,7 +133,7 @@ def currently_playing_response(args)
   end
 end
 
-def get_playback_response(spotify_user)
+def get_playback_response(spotify_user, overwrites)
   {
     status: 200,
     body: {
@@ -141,7 +141,7 @@ def get_playback_response(spotify_user)
       progress_ms: spotify_user.millisecond_progress_into_song,
       item: {
         name: spotify_user.song_name,
-        uri: spotify_user.song_uri,
+        uri: overwrites[:song_uri] || spotify_user.song_uri,
       }
     }.to_json,
   }

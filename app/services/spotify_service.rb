@@ -21,7 +21,10 @@ class SpotifyService
   end
 
   def current_playback_state
-    PlaybackState.from_spotify(song_request)
+      PlaybackState.from(
+        api_response: song_request,
+        spotify_user: spotify_user,
+      )
   end
 
   def listen_along(broadcaster:)

@@ -11,4 +11,16 @@ class SpotifyUser < ApplicationRecord
   def listening?
     is_listening
   end
+
+  def changed_song?
+    song_uri != last_song_uri
+  end
+
+  def on_same_song_as_broadcaster?
+    if broadcaster.nil?
+      false
+    else
+      song_uri == broadcaster.song_uri
+    end
+  end
 end

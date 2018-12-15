@@ -1,12 +1,13 @@
 class PlaybackState
-  def self.from_spotify(api_response)
-    new(api_response).playback_state
+  def self.from(api_response:, spotify_user:)
+    new(api_response, spotify_user).playback_state
   end
 
-  attr_reader :api_response
+  attr_reader :api_response, :spotify_user
 
-  def initialize(api_response)
+  def initialize(api_response, spotify_user)
     @api_response = api_response
+    @spotify_user = spotify_user
   end
 
   def playback_state
@@ -15,6 +16,7 @@ class PlaybackState
       song_name: song_name,
       song_uri: song_uri,
       millisecond_progress_into_song: millisecond_progress_into_song,
+      last_song_uri: spotify_user.song_uri,
     }
   end
 
