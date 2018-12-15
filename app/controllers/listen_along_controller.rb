@@ -1,9 +1,5 @@
 class ListenAlongController < ApiController
   def index
-    LoggerService.log_listen_along(
-      listener: listener,
-      broadcaster: broadcaster,
-    )
     SpotifyService.new(listener).listen_along(broadcaster: broadcaster)
     redirect_to listening_along
   end

@@ -37,10 +37,6 @@ class SpotifyService
       millisecond_progress_into_song: \
         broadcaster.millisecond_progress_into_song,
     )
-    LoggerService.log_playback_resync(
-      listener: spotify_user,
-      broadcaster: broadcaster,
-    )
   end
 
   private
@@ -123,7 +119,6 @@ class SpotifyService
           access_token: access_token,
           refresh_token: refresh_token,
         )
-        LoggerService.log_authentication(spotify_user)
       end
     end
 
