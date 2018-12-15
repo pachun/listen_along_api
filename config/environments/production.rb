@@ -84,10 +84,4 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   config.assets.compile = false
-
-  # Install the Timber.io logger, send logs over STDOUT. Actual log delivery
-  # to the Timber service is handled external of this application.
-  logger = Timber::Logger.new(STDOUT)
-  logger.level = config.log_level
-  config.logger = ActiveSupport::TaggedLogging.new(logger)
 end

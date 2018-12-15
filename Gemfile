@@ -13,7 +13,6 @@ gem "puma", "~> 3.11"
 gem "rack-cors", :require => "rack/cors"
 gem "rails", "~> 5.2.1"
 gem "rufus-scheduler"
-gem "timber", "~> 2.3"
 
 group :development, :test do
   gem "byebug", platforms: [:mri, :mingw, :x64_mingw]
