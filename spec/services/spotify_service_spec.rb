@@ -2,6 +2,30 @@ require "rails_helper"
 
 describe SpotifyService do
   describe "self.authenticate(using_authorization_code:)" do
+    context "the spotify user has authenticate using another device before" do
+      it "does not reset their listen along token" do
+        original_token = "original_token"
+
+        spotify_user = create :spotify_user,
+          username: "spotify_guy",
+          listen_along_token: original_token
+
+        stub_get_access_token_request(
+          authorization_code: "auth_code",
+          access_token: "t1"
+        )
+
+        stub_spotify_username_request(
+          access_token: "t1",
+          spotify_username: "spotify_guy",
+        )
+
+        SpotifyService.authenticate(using_authorization_code: "auth_code")
+
+        expect(spotify_user.reload.listen_along_token).to eq(original_token)
+      end
+    end
+
     it "finishes authenticating the spotify user and saves their credentials" do
       access_token_request = stub_get_access_token_request(
         authorization_code: "auth_code",
@@ -31,7 +55,7 @@ describe SpotifyService do
 
       stub_spotify_username_request(
         access_token: "access token 2",
-        spotify_username: "spotify_guy",
+        spotify_username: "spotify_guy_2",
       )
 
       spotify_user_2 = SpotifyService.authenticate(
@@ -39,6 +63,7 @@ describe SpotifyService do
       )
 
       expect(access_token_request).to have_been_requested
+      expect(spotify_user_2.username).to eq("spotify_guy_2")
       expect(spotify_user_2.access_token).to eq("access token 2")
       expect(spotify_user_2.refresh_token).to eq("refresh token 2")
       expect(spotify_user_2.listen_along_token.length).to eq(32)

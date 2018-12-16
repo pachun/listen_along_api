@@ -113,20 +113,37 @@ class SpotifyService
       @authorization_code = authorization_code
     end
 
-    def authenticate
-      SpotifyUser
-        .find_or_create_by(username: listener_username)
-        .tap do |spotify_user|
+    def spotify_user
+      SpotifyUser.find_by(username: listener_username)
+    end
 
-        spotify_user.update(
-          access_token: access_token,
-          refresh_token: refresh_token,
-          listen_along_token: new_token,
-        )
+    def authenticate
+      if spotify_user.present?
+        update_spotify_tokens
+      else
+        create_new_spotify_user
       end
+
+      spotify_user
     end
 
     private
+
+    def create_new_spotify_user
+      SpotifyUser.create(
+        username: listener_username,
+        access_token: access_token,
+        refresh_token: refresh_token,
+        listen_along_token: new_token,
+      )
+    end
+
+    def update_spotify_tokens
+      spotify_user.update(
+        access_token: access_token,
+        refresh_token: refresh_token,
+      )
+    end
 
     def new_token
       (0...32).map { ('a'..'z').to_a[rand(26)] }.join
