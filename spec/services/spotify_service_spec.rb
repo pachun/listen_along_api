@@ -14,13 +14,14 @@ describe SpotifyService do
         spotify_username: "spotify_guy",
       )
 
-      spotify_user = SpotifyService.authenticate(
+      spotify_user_1 = SpotifyService.authenticate(
         using_authorization_code: "auth_code",
       )
 
       expect(access_token_request).to have_been_requested
-      expect(spotify_user.access_token).to eq("access token 1")
-      expect(spotify_user.refresh_token).to eq("refresh token 1")
+      expect(spotify_user_1.access_token).to eq("access token 1")
+      expect(spotify_user_1.refresh_token).to eq("refresh token 1")
+      expect(spotify_user_1.listen_along_token.length).to eq(32)
 
       access_token_request = stub_get_access_token_request(
         authorization_code: "auth_code_2",
@@ -33,13 +34,18 @@ describe SpotifyService do
         spotify_username: "spotify_guy",
       )
 
-      spotify_user = SpotifyService.authenticate(
+      spotify_user_2 = SpotifyService.authenticate(
         using_authorization_code: "auth_code_2",
       )
 
       expect(access_token_request).to have_been_requested
-      expect(spotify_user.access_token).to eq("access token 2")
-      expect(spotify_user.refresh_token).to eq("refresh token 2")
+      expect(spotify_user_2.access_token).to eq("access token 2")
+      expect(spotify_user_2.refresh_token).to eq("refresh token 2")
+      expect(spotify_user_2.listen_along_token.length).to eq(32)
+
+      expect(spotify_user_1.listen_along_token).not_to(
+        eq(spotify_user_2.listen_along_token)
+      )
     end
 
     it "creates only one spotify credential per spotify user" do

@@ -121,11 +121,16 @@ class SpotifyService
         spotify_user.update(
           access_token: access_token,
           refresh_token: refresh_token,
+          listen_along_token: new_token,
         )
       end
     end
 
     private
+
+    def new_token
+      (0...32).map { ('a'..'z').to_a[rand(26)] }.join
+    end
 
     def access_token
       @access_token ||= spotify_user_json["access_token"]

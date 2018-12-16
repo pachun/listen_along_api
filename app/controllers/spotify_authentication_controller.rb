@@ -1,12 +1,13 @@
 class SpotifyAuthenticationController < ApiController
   def index
-    listener = SpotifyService.authenticate(
+    authenticating_user = SpotifyService.authenticate(
       using_authorization_code: code
     )
 
     redirect_to listen_along_index_path(
       broadcaster: broadcaster_username,
-      listener: listener.username,
+      listener_token: authenticating_user.listen_along_token,
+      authenticating: true,
     )
   end
 
