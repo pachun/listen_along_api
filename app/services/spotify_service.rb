@@ -4,6 +4,7 @@ class SpotifyService
   PLAY_SONG_ENDPOINT = "/v1/me/player/play"
   SPOTIFY_USERNAME_ENDPOINT = "/v1/me"
   SPOTIFY_AUTHORIZATION_URL = "https://accounts.spotify.com/api/token"
+  REPEAT_OFF_ENDPOINT = "/v1/me/player/repeat?state=off"
   AUTHENTICATING_HEADER = "Basic #{Base64.urlsafe_encode64(
     "#{ENV["SPOTIFY_CLIENT_ID"]}:#{ENV["SPOTIFY_CLIENT_SECRET"]}"
   )}"
@@ -21,18 +22,29 @@ class SpotifyService
   end
 
   def current_playback_state
-      PlaybackState.from(
-        api_response: song_request,
-        spotify_user: spotify_user,
-      )
+    PlaybackState.from(
+      api_response: song_request,
+      spotify_user: spotify_user,
+    )
   end
 
   def listen_along(broadcaster:)
+    refresh_token_and_listen_along(broadcaster: broadcaster)
+    turn_off_repeat
+    update_listener_state(broadcaster)
+  end
+
+  private
+
+  def refresh_token_and_listen_along(broadcaster:)
     playback_state = SpotifyService.new(broadcaster).current_playback_state
     if spotify_access_token_expired?(listen_along_request(playback_state))
       refresh_access_token
       listen_along_request(playback_state)
     end
+  end
+
+  def update_listener_state(broadcaster)
     spotify_user.update(
       broadcaster: broadcaster,
       song_name: broadcaster.song_name,
@@ -42,7 +54,14 @@ class SpotifyService
     )
   end
 
-  private
+  def turn_off_repeat
+    if !spotify_user.broadcaster.present?
+      url = SpotifyService::SPOTIFY_API_URL + REPEAT_OFF_ENDPOINT
+      Faraday.put(url) do |request|
+        request.headers["Authorization"] = authenticated_header
+      end
+    end
+  end
 
   def song_request
     request = currently_playing_song_request

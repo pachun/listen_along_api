@@ -1,4 +1,13 @@
 module SpotifyServiceSpecHelpers
+  def stub_stop_playback_loop_request(spotify_user)
+    stub_request(
+      :put,
+      "https://api.spotify.com/v1/me/player/repeat?state=off",
+    ).with(
+      headers: { "Authorization": "Bearer #{spotify_user.access_token}" },
+    )
+  end
+
   def stub_get_playback_request(spotify_user, overwrites = {})
     stub_request(
       :get,
