@@ -21,8 +21,26 @@ describe "broadcasters controller" do
       get "/broadcasters"
 
       expect(JSON.parse(response.body)).to match_array([
-        "spotify user 2",
-        "spotify user 3",
+        { "username" => "spotify user 2", "broadcaster" => nil },
+        { "username" => "spotify user 3", "broadcaster" => nil },
+      ])
+    end
+
+    it "includes listener's broadcasters" do
+      broadcaster = create :spotify_user,
+        username: "broadcaster",
+        is_listening: true
+
+      create :spotify_user,
+        username: "listener",
+        is_listening: true,
+        broadcaster: broadcaster
+
+      get "/broadcasters"
+
+      expect(JSON.parse(response.body)).to match_array([
+        { "username" => "broadcaster", "broadcaster" => nil },
+        { "username" => "listener", "broadcaster" => "broadcaster" },
       ])
     end
   end
