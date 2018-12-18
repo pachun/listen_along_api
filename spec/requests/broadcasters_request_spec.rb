@@ -1,13 +1,13 @@
 require "rails_helper"
 
-describe "broadcasters controller" do
+describe ListenersController do
   describe "GET #index" do
-    it "returns the names of the current broadcasters" do
+    it "returns the names of the current listeners" do
       create :spotify_user,
         username: "spotify user 1",
         is_listening: false
 
-      get "/broadcasters"
+      get "/listeners"
 
       expect(JSON.parse(response.body)).to eq([])
 
@@ -18,7 +18,7 @@ describe "broadcasters controller" do
         username: "spotify user 3",
         is_listening: true
 
-      get "/broadcasters"
+      get "/listeners"
 
       expect(JSON.parse(response.body)).to match_array([
         { "username" => "spotify user 2", "broadcaster" => nil },
@@ -36,7 +36,7 @@ describe "broadcasters controller" do
         is_listening: true,
         broadcaster: broadcaster
 
-      get "/broadcasters"
+      get "/listeners"
 
       expect(JSON.parse(response.body)).to match_array([
         { "username" => "broadcaster", "broadcaster" => nil },

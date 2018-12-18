@@ -1,4 +1,4 @@
-class BroadcastersController < ApiController
+class ListenersController < ApiController
   def index
     render json: broadcasters
   end

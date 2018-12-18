@@ -3,7 +3,7 @@ Rails.application.routes.draw do
   ActiveAdmin.routes(self)
   root to: "admin/spotify_users#index"
 
-  resources :broadcasters, only: [:index]
+  resources :listeners, only: [:index]
   resources :listen_along, only: [:index]
   resources :spotify_authentication, only: [:index]
 end
