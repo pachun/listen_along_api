@@ -31,3 +31,6 @@
 
 # html test coverage reports
 coverage
+
+# production database dumps
+latest.dump
