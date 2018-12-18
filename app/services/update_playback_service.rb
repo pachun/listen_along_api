@@ -16,34 +16,6 @@ class UpdatePlaybackService
 
   private
 
-  def unsync_listeners_who_started_a_new_song
-    listeners.each do |listener|
-      if listener_started_new_song?(listener)
-        listener.update(broadcaster: nil)
-      end
-    end
-  end
-
-  def listener_started_new_song?(listener)
-    !listener.broadcaster.changed_song? &&
-      !listener.on_same_song_as_broadcaster?
-  end
-
-  def resync_listeners_whose_broadcaster_started_a_new_song
-    listeners.each do |listener|
-      if broadcaster_started_new_song?(listener)
-        SpotifyService.new(listener).listen_along(
-          broadcaster: listener.broadcaster,
-        )
-      end
-    end
-  end
-
-  def broadcaster_started_new_song?(listener)
-    listener.broadcaster.changed_song? &&
-      !listener.on_same_song_as_broadcaster?
-  end
-
   def update_playback_states
     SpotifyUser.all.each do |spotify_user|
       spotify_user.update(
@@ -56,22 +28,52 @@ class UpdatePlaybackService
     listeners_whose_broadcaster_stopped_broadcasting.update(broadcaster: nil)
   end
 
+  def unsync_listeners_who_started_a_new_song
+    listeners.each do |listener|
+      if listener_started_new_song?(listener)
+        listener.update(broadcaster: nil)
+      end
+    end
+  end
+
+  def resync_listeners_who_hit_end_of_song
+    listeners_whose_music_is_paused.each do |listener|
+      if broadcaster_started_new_song?(listener)
+        SpotifyService.new(listener).listen_along(
+          broadcaster: listener.broadcaster
+        )
+      end
+    end
+  end
+
+  def resync_listeners_whose_broadcaster_started_a_new_song
+    listeners.each do |listener|
+      if broadcaster_started_new_song?(listener)
+        SpotifyService.new(listener).listen_along(
+          broadcaster: listener.broadcaster,
+        )
+      end
+    end
+  end
+
+  def listener_started_new_song?(listener)
+    !listener.broadcaster.changed_song? &&
+      !listener.on_same_song_as_broadcaster?
+  end
+
+  def broadcaster_started_new_song?(listener)
+    listener.broadcaster.changed_song? &&
+      !listener.on_same_song_as_broadcaster?
+  end
+
   def listeners
     SpotifyUser
       .where(is_listening: true)
       .where.not(broadcaster: nil)
   end
 
-  def resync_listeners_who_hit_end_of_song
-    listeners_who_hit_end_of_song.each do |listener|
-      SpotifyService.new(listener).listen_along(
-        broadcaster: listener.broadcaster
-      )
-    end
-  end
-
-  def listeners_who_hit_end_of_song
-    @listeners_who_hit_end_of_song ||= SpotifyUser
+  def listeners_whose_music_is_paused
+    @listeners_whose_music_is_paused ||= SpotifyUser
       .where(is_listening: false)
       .where.not(broadcaster: nil)
   end

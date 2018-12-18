@@ -126,7 +126,7 @@ describe UpdatePlaybackService do
       end
     end
 
-    context "listeners playbacks have ended" do
+    context "listeners playbacks have ended because broadcaster started new song" do
       it "updates spotify user's playback state" do
         spotify_user_1 = create :spotify_user,
           is_listening: true,
@@ -181,6 +181,7 @@ describe UpdatePlaybackService do
         }
 
         broadcaster = create :spotify_user,
+          song_uri: "something_different",
           is_listening: true
         listener = create :spotify_user,
           broadcaster: broadcaster
@@ -201,6 +202,42 @@ describe UpdatePlaybackService do
         UpdatePlaybackService.update
 
         expect(listener_spotify_service).to(
+          have_received(:listen_along).with(broadcaster: broadcaster)
+        )
+      end
+    end
+
+    context "listeners playback has ended because they intentionally paused" do
+      it "does not resync listener's playback with their broadcaster's" do
+        beam_me_up = {
+          is_listening: true,
+          song_name: "Beam Me Up",
+          song_uri: "spotify:track:1S4FHBl24uLTzJ37VMBjut",
+          millisecond_progress_into_song: "10000",
+        }
+
+        broadcaster = create :spotify_user,
+          last_song_uri: beam_me_up[:song_uri],
+          is_listening: true
+        listener = create :spotify_user,
+          broadcaster: broadcaster
+
+        broadcaster_spotify_service = instance_double(SpotifyService)
+        allow(SpotifyService).to receive(:new).with(broadcaster)
+          .and_return(broadcaster_spotify_service)
+        allow(broadcaster_spotify_service).to receive(:current_playback_state)
+          .and_return(beam_me_up)
+
+        listener_spotify_service = instance_double(SpotifyService)
+        allow(SpotifyService).to receive(:new).with(listener)
+          .and_return(listener_spotify_service)
+        allow(listener_spotify_service).to receive(:current_playback_state)
+          .and_return(not_listening_state)
+        allow(listener_spotify_service).to receive(:listen_along)
+
+        UpdatePlaybackService.update
+
+        expect(listener_spotify_service).not_to(
           have_received(:listen_along).with(broadcaster: broadcaster)
         )
       end
