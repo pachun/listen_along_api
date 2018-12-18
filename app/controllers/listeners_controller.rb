@@ -6,7 +6,7 @@ class ListenersController < ApiController
   private
 
   def broadcasters
-    SpotifyUser.where(is_listening: true).map do |spotify_user|
+    SpotifyUser.where(is_listening: true).order(:username).map do |spotify_user|
       {
         username: spotify_user.username,
         broadcaster: spotify_user&.broadcaster&.username,
