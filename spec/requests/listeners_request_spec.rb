@@ -21,8 +21,8 @@ describe ListenersController do
       get "/listeners"
 
       expect(JSON.parse(response.body)).to eq([
-        { "username" => "spotify user 2", "broadcaster" => nil },
-        { "username" => "spotify user 3", "broadcaster" => nil },
+        { "username" => "spotify user 2", "broadcaster" => nil, "is_me" => false },
+        { "username" => "spotify user 3", "broadcaster" => nil, "is_me" => false},
       ])
     end
 
@@ -39,8 +39,26 @@ describe ListenersController do
       get "/listeners"
 
       expect(JSON.parse(response.body)).to match_array([
-        { "username" => "broadcaster", "broadcaster" => nil },
-        { "username" => "listener", "broadcaster" => "broadcaster" },
+        { "username" => "broadcaster", "broadcaster" => nil, "is_me" => false },
+        { "username" => "listener", "broadcaster" => "broadcaster", "is_me" => false },
+      ])
+    end
+
+    it "indicates which listener is me" do
+      create :spotify_user,
+        username: "a",
+        is_listening: true,
+        listen_along_token: "my_token"
+
+      create :spotify_user,
+        username: "b",
+        is_listening: true
+
+      get "/listeners?token=my_token"
+
+      expect(JSON.parse(response.body)).to eq([
+        { "username" => "a", "broadcaster" => nil, "is_me" => true },
+        { "username" => "b", "broadcaster" => nil, "is_me" => false },
       ])
     end
   end
