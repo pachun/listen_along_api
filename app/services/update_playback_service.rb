@@ -10,6 +10,7 @@ class UpdatePlaybackService
 
     unsync_listeners_whose_broadcaster_stopped_broadcasting
     unsync_listeners_who_started_a_new_song
+    unsync_listeners_who_paused_their_music
     resync_listeners_who_hit_end_of_song
     resync_listeners_whose_broadcaster_started_a_new_song
   end
@@ -31,6 +32,14 @@ class UpdatePlaybackService
   def unsync_listeners_who_started_a_new_song
     listeners.each do |listener|
       if listener_started_new_song?(listener)
+        listener.update(broadcaster: nil)
+      end
+    end
+  end
+
+  def unsync_listeners_who_paused_their_music
+    listeners_whose_music_is_paused.each do |listener|
+      unless broadcaster_started_new_song?(listener)
         listener.update(broadcaster: nil)
       end
     end
@@ -62,7 +71,7 @@ class UpdatePlaybackService
   end
 
   def broadcaster_started_new_song?(listener)
-    listener.broadcaster.changed_song? &&
+    listener.broadcaster&.changed_song? &&
       !listener.on_same_song_as_broadcaster?
   end
 

@@ -240,6 +240,7 @@ describe UpdatePlaybackService do
         expect(listener_spotify_service).not_to(
           have_received(:listen_along).with(broadcaster: broadcaster)
         )
+        expect(listener.reload.broadcaster).not_to be_present
       end
     end
 
