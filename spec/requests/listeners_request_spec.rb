@@ -26,6 +26,24 @@ describe ListenersController do
       ])
     end
 
+    it "returns listeners in between songs, listening along with a broadcaster" do
+      broadcaster = create :spotify_user,
+        username: "broadcaster",
+        is_listening: true
+
+      create :spotify_user,
+        username: "listener",
+        is_listening: false,
+        broadcaster: broadcaster
+
+      get "/listeners"
+
+      expect(JSON.parse(response.body)).to eq([
+        { "username" => "broadcaster", "broadcaster" => nil, "is_me" => false },
+        { "username" => "listener", "broadcaster" => "broadcaster", "is_me" => false},
+      ])
+    end
+
     it "includes listener's broadcasters" do
       broadcaster = create :spotify_user,
         username: "broadcaster",
