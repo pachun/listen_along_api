@@ -6,4 +6,7 @@ Rails.application.routes.draw do
   resources :listeners, only: [:index]
   resources :listen_along, only: [:index]
   resources :spotify_authentication, only: [:index]
+
+  # untested but required - do not remove:
+  mount ActionCable.server => '/cable'
 end

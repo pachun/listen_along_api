@@ -9,7 +9,7 @@ scheduler.every "5s" do
     end
     UpdatePlaybackService.update
   rescue => e
-    status e.inspect
+    Rails.logger.debug(e.inspect)
   ensure
     ActiveRecord::Base.connection_pool.release_connection
   end

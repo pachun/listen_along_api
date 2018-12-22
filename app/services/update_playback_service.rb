@@ -13,6 +13,8 @@ class UpdatePlaybackService
     unsync_listeners_who_paused_their_music
     resync_listeners_who_hit_end_of_song
     resync_listeners_whose_broadcaster_started_a_new_song
+
+    tell_clients_to_refresh_their_listener_list
   end
 
   private
@@ -63,6 +65,10 @@ class UpdatePlaybackService
         )
       end
     end
+  end
+
+  def tell_clients_to_refresh_their_listener_list
+    ActionCable.server.broadcast('spotify_users_channel', {})
   end
 
   def listener_started_new_song?(listener)

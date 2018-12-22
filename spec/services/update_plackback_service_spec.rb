@@ -2,6 +2,12 @@ require "rails_helper"
 
 describe UpdatePlaybackService do
   describe "self.update" do
+    it "tells clients to refresh their listener list" do
+      expect {
+        UpdatePlaybackService.update
+      }.to have_broadcasted_to("spotify_users_channel").with({})
+    end
+
     it "moves song_uri into last_song_uri" do
       spotify_user_1 = create :spotify_user,
         access_token: "t1",
