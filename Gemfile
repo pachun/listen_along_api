@@ -16,6 +16,7 @@ gem "rack-cors", :require => "rack/cors"
 gem "rails", "~> 5.2.1"
 gem "redis"
 gem "rufus-scheduler"
+gem "timber"
 
 group :development, :test do
   gem "byebug", platforms: [:mri, :mingw, :x64_mingw]
