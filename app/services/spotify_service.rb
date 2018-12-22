@@ -133,7 +133,7 @@ class SpotifyService
     end
 
     def spotify_user
-      SpotifyUser.find_by(username: listener_username)
+      SpotifyUser.find_by(username: spotify_username)
     end
 
     def authenticate
@@ -150,7 +150,8 @@ class SpotifyService
 
     def create_new_spotify_user
       SpotifyUser.create(
-        username: listener_username,
+        username: spotify_username,
+        display_name: display_name,
         access_token: access_token,
         refresh_token: refresh_token,
         listen_along_token: new_token,
@@ -176,22 +177,12 @@ class SpotifyService
       @refresh_token ||= spotify_user_json["refresh_token"]
     end
 
-    def listener_username
-      return @listener_username if @listener_username.present?
-
-      if spotify_username_is_all_numerical?
-        @listener_username = full_name
-      else
-        @listener_username = spotify_username
-      end
-    end
-
     def spotify_username
       @spotify_username ||= username_request["id"]
     end
 
-    def full_name
-      @full_name ||= username_request["display_name"]
+    def display_name
+      @display_name ||= username_request["display_name"]
     end
 
     def username_request
@@ -217,10 +208,6 @@ class SpotifyService
           "redirect_uri": "#{ENV["API_URL"]}/spotify_authentication",
         }
       end
-    end
-
-    def spotify_username_is_all_numerical?
-      true if Float(spotify_username) rescue false
     end
   end
 end

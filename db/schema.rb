@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_12_15_025756) do
+ActiveRecord::Schema.define(version: 2018_12_22_020308) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -52,8 +52,9 @@ ActiveRecord::Schema.define(version: 2018_12_15_025756) do
     t.string "song_uri"
     t.string "millisecond_progress_into_song"
     t.boolean "is_listening", default: false
-    t.string "listen_along_token"
     t.string "last_song_uri"
+    t.string "listen_along_token"
+    t.string "display_name"
     t.index ["spotify_user_id"], name: "index_spotify_users_on_spotify_user_id"
   end
 

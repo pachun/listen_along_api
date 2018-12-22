@@ -8,15 +8,23 @@ ActiveAdmin.register SpotifyUser do
     :song_uri,
     :millisecond_progress_into_song,
     :is_listening,
-    :broadcaster
+    :broadcaster,
+    :display_name
 
   index do
     actions
     id_column
-    column :username
+    column :display_name
     column :broadcaster
     column :song_name
     column :millisecond_progress_into_song
     column :is_listening
+    column :username
+  end
+
+  form do |f|
+    f.semantic_errors
+    f.inputs
+    f.actions
   end
 end

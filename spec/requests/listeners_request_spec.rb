@@ -12,17 +12,19 @@ describe ListenersController do
       expect(JSON.parse(response.body)).to eq([])
 
       create :spotify_user,
-        username: "spotify user 3",
+        username: "spotify user 2",
+        display_name: "Zenrique Soup",
         is_listening: true
       create :spotify_user,
-        username: "spotify user 2",
+        username: "spotify user 3",
+        display_name: "Alfred Mosley",
         is_listening: true
 
       get "/listeners"
 
       expect(JSON.parse(response.body)).to eq([
-        { "username" => "spotify user 2", "broadcaster" => nil, "is_me" => false },
-        { "username" => "spotify user 3", "broadcaster" => nil, "is_me" => false},
+        { "display_name" => "Alfred Mosley", "username" => "spotify user 3", "broadcaster" => nil, "is_me" => false},
+        { "display_name" => "Zenrique Soup", "username" => "spotify user 2", "broadcaster" => nil, "is_me" => false },
       ])
     end
 
@@ -39,8 +41,8 @@ describe ListenersController do
       get "/listeners"
 
       expect(JSON.parse(response.body)).to eq([
-        { "username" => "broadcaster", "broadcaster" => nil, "is_me" => false },
-        { "username" => "listener", "broadcaster" => "broadcaster", "is_me" => false},
+        { "display_name" => nil, "username" => "broadcaster", "broadcaster" => nil, "is_me" => false },
+        { "display_name" => nil, "username" => "listener", "broadcaster" => "broadcaster", "is_me" => false},
       ])
     end
 
@@ -57,8 +59,8 @@ describe ListenersController do
       get "/listeners"
 
       expect(JSON.parse(response.body)).to match_array([
-        { "username" => "broadcaster", "broadcaster" => nil, "is_me" => false },
-        { "username" => "listener", "broadcaster" => "broadcaster", "is_me" => false },
+        { "display_name" => nil, "username" => "broadcaster", "broadcaster" => nil, "is_me" => false },
+        { "display_name" => nil, "username" => "listener", "broadcaster" => "broadcaster", "is_me" => false },
       ])
     end
 
@@ -75,8 +77,8 @@ describe ListenersController do
       get "/listeners?token=my_token"
 
       expect(JSON.parse(response.body)).to eq([
-        { "username" => "a", "broadcaster" => nil, "is_me" => true },
-        { "username" => "b", "broadcaster" => nil, "is_me" => false },
+        { "display_name" => nil, "username" => "a", "broadcaster" => nil, "is_me" => true },
+        { "display_name" => nil, "username" => "b", "broadcaster" => nil, "is_me" => false },
       ])
     end
   end

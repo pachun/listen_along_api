@@ -1,25 +1,15 @@
 class ListenersController < ApiController
   def index
-    render json: broadcasters
+    render json: active_listeners, spotify_user_token: listeners_params[:token]
   end
 
   private
-
-  def broadcasters
-    active_listeners.map do |spotify_user|
-      {
-        username: spotify_user.username,
-        broadcaster: spotify_user&.broadcaster&.username,
-        is_me: spotify_user.listen_along_token == listeners_params[:token],
-      }
-    end
-  end
 
   def active_listeners
     SpotifyUser
       .where(is_listening: true)
       .or(SpotifyUser.where.not(broadcaster: nil))
-      .order(:username)
+      .order(:display_name)
   end
 
   def listeners_params
