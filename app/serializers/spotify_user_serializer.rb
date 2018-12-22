@@ -1,9 +1,7 @@
 class SpotifyUserSerializer < ActiveModel::Serializer
-  attributes :username, :display_name, :broadcaster, :is_me
+  attributes :username, :display_name, :is_me
 
-  def broadcaster
-    object.broadcaster&.username
-  end
+  has_one :broadcaster
 
   def is_me
     @instance_options[:spotify_user_token] == object.listen_along_token

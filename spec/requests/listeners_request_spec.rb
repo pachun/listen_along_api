@@ -22,10 +22,12 @@ describe ListenersController do
 
       get "/listeners"
 
-      expect(JSON.parse(response.body)).to eq([
-        { "display_name" => "Alfred Mosley", "username" => "spotify user 3", "broadcaster" => nil, "is_me" => false},
-        { "display_name" => "Zenrique Soup", "username" => "spotify user 2", "broadcaster" => nil, "is_me" => false },
-      ])
+      listeners = JSON.parse(response.body)
+      first_listener = listeners.first["display_name"]
+      second_listener = listeners.last["display_name"]
+
+      expect(first_listener).to eq("Alfred Mosley")
+      expect(second_listener).to eq("Zenrique Soup")
     end
 
     it "returns listeners in between songs, listening along with a broadcaster" do
@@ -34,52 +36,38 @@ describe ListenersController do
         is_listening: true
 
       create :spotify_user,
-        username: "listener",
+        display_name: "listener",
         is_listening: false,
         broadcaster: broadcaster
 
       get "/listeners"
 
-      expect(JSON.parse(response.body)).to eq([
-        { "display_name" => nil, "username" => "broadcaster", "broadcaster" => nil, "is_me" => false },
-        { "display_name" => nil, "username" => "listener", "broadcaster" => "broadcaster", "is_me" => false},
-      ])
-    end
+      listeners = JSON.parse(response.body).map do |listener|
+        listener["display_name"]
+      end
 
-    it "includes listener's broadcasters" do
-      broadcaster = create :spotify_user,
-        username: "broadcaster",
-        is_listening: true
-
-      create :spotify_user,
-        username: "listener",
-        is_listening: true,
-        broadcaster: broadcaster
-
-      get "/listeners"
-
-      expect(JSON.parse(response.body)).to match_array([
-        { "display_name" => nil, "username" => "broadcaster", "broadcaster" => nil, "is_me" => false },
-        { "display_name" => nil, "username" => "listener", "broadcaster" => "broadcaster", "is_me" => false },
-      ])
+      expect(listeners).to include("listener")
     end
 
     it "indicates which listener is me" do
       create :spotify_user,
-        username: "a",
+        username: "me",
         is_listening: true,
         listen_along_token: "my_token"
 
       create :spotify_user,
-        username: "b",
+        username: "someone_else",
         is_listening: true
 
       get "/listeners?token=my_token"
 
-      expect(JSON.parse(response.body)).to eq([
-        { "display_name" => nil, "username" => "a", "broadcaster" => nil, "is_me" => true },
-        { "display_name" => nil, "username" => "b", "broadcaster" => nil, "is_me" => false },
-      ])
+      me = JSON.parse(response.body).select do |listener|
+        listener["is_me"] == true
+      end
+
+      expect(me).to be_present
+      expect(me.length).to eq(1)
+      expect(me.first["username"]).to eq("me")
     end
   end
 end
