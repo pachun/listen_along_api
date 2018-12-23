@@ -1,7 +1,7 @@
 require "rails_helper"
 
 describe SpotifyUserSerializer do
-  it "serializes ids" do
+  it "serializes broadcasters" do
     broadcaster = create :spotify_user,
       username: "broadcaster",
       display_name: "Broadcaster Name"
@@ -20,6 +20,19 @@ describe SpotifyUserSerializer do
       "username" => "broadcaster",
       "display_name" => "Broadcaster Name",
       "is_me" => false,
+      "avatar_url" => nil,
     )
+  end
+
+  it "serializes avatar urls" do
+    listener = create :spotify_user,
+      avatar_url: "http://x.y.z.jpg"
+
+    serializer = SpotifyUserSerializer.new(listener)
+    serialization = ActiveModelSerializers::Adapter.create(serializer).to_json
+
+    avatar_url = JSON.parse(serialization)["avatar_url"]
+
+    expect(avatar_url).to eq("http://x.y.z.jpg")
   end
 end

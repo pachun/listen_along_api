@@ -1,5 +1,5 @@
 class SpotifyUserSerializer < ActiveModel::Serializer
-  attributes :username, :display_name, :is_me
+  attributes :username, :display_name, :is_me, :avatar_url
 
   has_one :broadcaster
 

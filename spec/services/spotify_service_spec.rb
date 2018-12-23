@@ -73,6 +73,25 @@ describe SpotifyService do
       )
     end
 
+    it "saves the spotify user's avatar url" do
+      spotify_authentication_token_request = stub_get_access_token_request(
+        authorization_code: "auth_code",
+        access_token: "access token",
+        refresh_token: "refresh token",
+      )
+      spotify_username_request = stub_spotify_username_request(
+        access_token: "access token",
+        spotify_username: "121613941",
+        avatar_url: "http://x.y.z.jpg",
+      )
+
+      SpotifyService.authenticate(using_authorization_code: "auth_code")
+
+      expect(spotify_username_request).to have_been_requested
+      expect(spotify_authentication_token_request).to have_been_requested
+      expect(SpotifyUser.last.avatar_url).to eq("http://x.y.z.jpg")
+    end
+
     it "saves the spotify user's real full name" do
       spotify_authentication_token_request = stub_get_access_token_request(
         authorization_code: "auth_code",

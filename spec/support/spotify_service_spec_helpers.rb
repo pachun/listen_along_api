@@ -114,6 +114,7 @@ module SpotifyServiceSpecHelpers
       body: {
         "id": args[:spotify_username],
         "display_name": args[:full_name],
+        "images": [ "url": args[:avatar_url] ],
       }.to_json,
     )
   end

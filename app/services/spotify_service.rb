@@ -155,6 +155,7 @@ class SpotifyService
         access_token: access_token,
         refresh_token: refresh_token,
         listen_along_token: new_token,
+        avatar_url: avatar_url,
       )
     end
 
@@ -183,6 +184,10 @@ class SpotifyService
 
     def display_name
       @display_name ||= username_request["display_name"]
+    end
+
+    def avatar_url
+      @avatar_url ||= username_request["images"]&.first&.dig("url")
     end
 
     def username_request

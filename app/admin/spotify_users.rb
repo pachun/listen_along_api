@@ -9,7 +9,8 @@ ActiveAdmin.register SpotifyUser do
     :millisecond_progress_into_song,
     :is_listening,
     :broadcaster,
-    :display_name
+    :display_name,
+    :avatar_url
 
   index do
     actions
