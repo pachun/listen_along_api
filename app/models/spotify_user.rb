@@ -23,4 +23,8 @@ class SpotifyUser < ApplicationRecord
       song_uri == broadcaster.song_uri
     end
   end
+
+  def number_of_listeners
+    SpotifyUser.where(broadcaster: self).count
+  end
 end

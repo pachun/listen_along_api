@@ -8,7 +8,6 @@ class ListenersController < ApiController
   def active_listeners
     SpotifyUser
       .where(is_listening: true)
-      .or(SpotifyUser.where.not(broadcaster: nil))
       .order(:display_name)
   end
 
