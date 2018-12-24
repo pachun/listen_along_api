@@ -8,6 +8,7 @@ class ListenersController < ApiController
   def active_listeners
     SpotifyUser
       .where(is_listening: true)
+      .where(broadcaster: nil)
       .order(:display_name)
   end
 

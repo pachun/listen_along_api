@@ -30,14 +30,14 @@ describe ListenersController do
       expect(second_listener).to eq("Zenrique Soup")
     end
 
-    it "does not return listeners in between songs, listening along with a broadcaster" do
+    it "does not return listeners who are listening along with someone" do
       broadcaster = create :spotify_user,
         username: "broadcaster",
         is_listening: true
 
       create :spotify_user,
         display_name: "listener",
-        is_listening: false,
+        is_listening: true,
         broadcaster: broadcaster
 
       get "/listeners"
