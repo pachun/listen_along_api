@@ -69,5 +69,31 @@ describe ListenersController do
       expect(me.length).to eq(1)
       expect(me.first["username"]).to eq("me")
     end
+
+    it "indicates who I am listening along with" do
+      broadcaster_1 = create :spotify_user,
+        is_listening: true,
+        username: "broadcaster_1"
+
+      create :spotify_user,
+        is_listening: true,
+        username: "broadcaster_2"
+
+      create :spotify_user,
+        is_listening: true,
+        username: "me",
+        listen_along_token: "my_token",
+        broadcaster: broadcaster_1
+
+      get "/listeners?token=my_token"
+
+      broadcaster_json = JSON.parse(response.body).select do |listener|
+        listener["listening_along"] == true
+      end
+
+      expect(broadcaster_json).to be_present
+      expect(broadcaster_json.length).to eq(1)
+      expect(broadcaster_json.first["username"]).to eq("broadcaster_1")
+    end
   end
 end

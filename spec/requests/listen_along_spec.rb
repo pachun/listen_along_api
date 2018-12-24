@@ -63,7 +63,7 @@ describe "GET #index" do
       get "/listen_along?broadcaster=#{broadcaster.username}&listener_token=#{listener.listen_along_token}&authenticating=true"
 
       authenticating_redirect = ENV["CLIENT_URL"] + \
-        "?broadcaster=#{broadcaster.username}&token=#{listener.listen_along_token}"
+        "?token=#{listener.listen_along_token}"
 
       expect(response).to redirect_to(authenticating_redirect)
     end

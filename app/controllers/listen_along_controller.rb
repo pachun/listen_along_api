@@ -21,7 +21,7 @@ class ListenAlongController < ApiController
   end
 
   def client
-    ENV["CLIENT_URL"] + "?broadcaster=#{broadcaster.username}&token=#{listener.listen_along_token}"
+    ENV["CLIENT_URL"] + "?token=#{listener.listen_along_token}"
   end
 
   def listen_along_params

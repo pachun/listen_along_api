@@ -140,6 +140,12 @@ def currently_playing_response(args)
         item: {
           name: args[:song_name],
           uri: args[:song_uri],
+          album: {
+            images: [{
+              url: args[:album_url],
+            }],
+          },
+          artists: [{ "name": nil }]
         }
       }.to_json,
     }
@@ -147,6 +153,8 @@ def currently_playing_response(args)
 end
 
 def get_playback_response(spotify_user, overwrites)
+  artists = overwrites[:song_artists]&.map { |artist| { name: artist } }
+  artists ||= [{name: nil}]
   {
     status: 200,
     body: {
@@ -155,6 +163,12 @@ def get_playback_response(spotify_user, overwrites)
       item: {
         name: spotify_user.song_name,
         uri: overwrites[:song_uri] || spotify_user.song_uri,
+        album: {
+          images: [{
+            url: overwrites[:album_url],
+          }],
+        },
+        artists: artists,
       }
     }.to_json,
   }

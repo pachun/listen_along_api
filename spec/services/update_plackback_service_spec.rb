@@ -2,6 +2,42 @@ require "rails_helper"
 
 describe UpdatePlaybackService do
   describe "self.update" do
+    it "saves song artists" do
+      spotify_user = create :spotify_user,
+        is_listening: true,
+        access_token: "t1"
+
+      stub_get_playback_request(spotify_user, song_artists: ["one", "two"])
+
+      UpdatePlaybackService.update
+
+      expect(spotify_user.reload.song_artists).to eq(["one", "two"])
+
+      stub_get_playback_request(spotify_user, song_artists: ["three", "four"])
+
+      UpdatePlaybackService.update
+
+      expect(spotify_user.reload.song_artists).to eq(["three", "four"])
+    end
+
+    it "saves song album cover urls" do
+      spotify_user = create :spotify_user,
+        is_listening: true,
+        access_token: "t1"
+
+      stub_get_playback_request(spotify_user, album_url: "http://x.y.z.jpg")
+
+      UpdatePlaybackService.update
+
+      expect(spotify_user.reload.song_album_cover_url).to eq("http://x.y.z.jpg")
+
+      stub_get_playback_request(spotify_user, album_url: "another_url")
+
+      UpdatePlaybackService.update
+
+      expect(spotify_user.reload.song_album_cover_url).to eq("another_url")
+    end
+
     it "tells clients to refresh their listener list" do
       expect {
         UpdatePlaybackService.update
