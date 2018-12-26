@@ -28,16 +28,12 @@ class UpdatePlaybackService
   end
 
   def unsync_listeners_whose_broadcaster_stopped_broadcasting
-    listeners_whose_broadcaster_stopped_broadcasting.each do |listener|
-      Rails.logger.info("#{listener.display_name} unsynced from #{listener.broadcaster.username} because #{listener.broadcaster.username} stopped broadcasting")
-    end
     listeners_whose_broadcaster_stopped_broadcasting.update(broadcaster: nil)
   end
 
   def unsync_listeners_who_started_a_new_song
     listeners.each do |listener|
       if listener_started_new_song?(listener)
-        Rails.logger.info("#{listener.display_name} unsynced from #{listener.broadcaster.username} because #{listener.display_name} started a new song")
         listener.update(broadcaster: nil)
       end
     end
@@ -45,8 +41,13 @@ class UpdatePlaybackService
 
   def unsync_listeners_who_paused_their_music
     listeners_whose_music_is_paused.each do |listener|
-      unless broadcaster_started_new_song?(listener)
-        Rails.logger.info("#{listener.display_name} unsynced from #{listener.broadcaster.username} because #{listener.display_name} paused their music")
+      if !broadcaster_started_new_song?(listener)
+        Rails.logger.info("#{listener.display_name} unsynced from #{listener.broadcaster.display_name} because #{listener.display_name} paused their music")
+        Rails.logger.info("#{listener.display_name} song_uri: #{listener.broadcaster.song_uri}")
+        Rails.logger.info("#{listener.display_name} song_uri: #{listener.song_uri}")
+        Rails.logger.info("#{listener.broadcaster.display_name} changed song: #{listener.broadcaster.changed_song?}")
+        Rails.logger.info("#{listener.broadcaster.display_name} last song: #{listener.broadcaster.last_song_uri}")
+        Rails.logger.info("#{listener.broadcaster.display_name} current song: #{listener.broadcaster.last_song_uri}")
         listener.update(broadcaster: nil)
       end
     end
