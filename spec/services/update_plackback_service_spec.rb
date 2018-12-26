@@ -249,7 +249,7 @@ describe UpdatePlaybackService do
       end
     end
 
-    context "listeners playback has ended because they intentionally paused" do
+    context "listeners playbacks have ended because they intentionally paused" do
       it "does not resync listener's playback with their broadcaster's" do
         beam_me_up = {
           is_listening: true,
@@ -279,10 +279,69 @@ describe UpdatePlaybackService do
 
         UpdatePlaybackService.update
 
-        expect(listener_spotify_service).not_to(
-          have_received(:listen_along).with(broadcaster: broadcaster)
+        listener.reload
+
+        expect(listener.maybe_intentionally_paused).to eq(true)
+
+        UpdatePlaybackService.update
+
+        listener.reload
+
+        expect(listener.broadcaster).not_to be_present
+        expect(listener.maybe_intentionally_paused).to eq(false)
+      end
+    end
+
+    context "it looks like a listener intentionally paused due to listen along playback latency" do
+      it "keeps the listener in sync with their broadcaster" do
+        same_song_uri = "spotify:track:1S4FHBl24uLTzJ37VMBjut"
+        broadcaster = create :spotify_user,
+          access_token: "b",
+          last_song_uri: same_song_uri,
+          is_listening: true,
+          song_name: "Beam Me Up",
+          song_uri: same_song_uri,
+          millisecond_progress_into_song: "10000"
+        listener = create :spotify_user,
+          access_token: "l",
+          broadcaster: broadcaster
+
+        stub_get_playback_request(broadcaster)
+        stub_currently_playing_request(
+          access_token: listener.access_token,
+          nothing_playing_response: true,
         )
-        expect(listener.reload.broadcaster).not_to be_present
+
+        UpdatePlaybackService.update
+
+        listener.reload
+
+        expect(listener.maybe_intentionally_paused).to eq(true)
+
+        next_song = {
+          is_listening: true,
+          song_name: "Next Song",
+          song_uri: "next_song_uri",
+          millisecond_progress_into_song: "10000",
+        }
+
+        stub_get_playback_request(broadcaster, next_song)
+        stub_currently_playing_request(
+          access_token: listener.access_token,
+          nothing_playing_response: true,
+        )
+        stub_set_playback_request(
+          listener: listener,
+          broadcaster: broadcaster,
+          overwrites: next_song,
+        )
+
+        UpdatePlaybackService.update
+
+        listener.reload
+
+        expect(listener.broadcaster).to eq(broadcaster)
+        expect(listener.maybe_intentionally_paused).to eq(false)
       end
     end
 

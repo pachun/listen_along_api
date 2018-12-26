@@ -27,4 +27,34 @@ class SpotifyUser < ApplicationRecord
   def number_of_listeners
     SpotifyUser.where(broadcaster: self).count
   end
+
+  def broadcaster_started_new_song?
+    broadcaster&.changed_song? &&
+      !on_same_song_as_broadcaster?
+  end
+
+  def resync_with_broadcaster!
+    update(maybe_intentionally_paused: false)
+    SpotifyService.new(self).listen_along(broadcaster: broadcaster)
+  end
+
+  def may_have_intentionally_paused?
+    !is_listening && !broadcaster_started_new_song? && !maybe_intentionally_paused
+  end
+
+  def intentionally_paused?
+    !broadcaster_started_new_song? && maybe_intentionally_paused
+  end
+
+  def started_playing_music_independently?
+    !broadcaster.changed_song? &&
+      !on_same_song_as_broadcaster?
+  end
+
+  def stop_listening_along!
+    update(
+      maybe_intentionally_paused: false,
+      broadcaster: nil,
+    )
+  end
 end

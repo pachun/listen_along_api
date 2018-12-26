@@ -10,9 +10,8 @@ class UpdatePlaybackService
 
     unsync_listeners_whose_broadcaster_stopped_broadcasting
     unsync_listeners_who_started_a_new_song
-    unsync_listeners_who_paused_their_music
-    resync_listeners_who_hit_end_of_song
     resync_listeners_whose_broadcaster_started_a_new_song
+    update_paused_listeners_playback
 
     tell_clients_to_refresh_their_listener_list
   end
@@ -33,39 +32,27 @@ class UpdatePlaybackService
 
   def unsync_listeners_who_started_a_new_song
     listeners.each do |listener|
-      if listener_started_new_song?(listener)
-        listener.update(broadcaster: nil)
+      if listener.started_playing_music_independently?
+        listener.stop_listening_along!
       end
     end
   end
 
-  def unsync_listeners_who_paused_their_music
+  def update_paused_listeners_playback
     listeners_whose_music_is_paused.each do |listener|
-      if !broadcaster_started_new_song?(listener)
-        Rails.logger.info("#{listener.display_name} unsynced from #{listener.broadcaster.display_name} because #{listener.display_name} paused their music")
-        Rails.logger.info("#{listener.display_name} song_uri: #{listener.broadcaster.song_uri}")
-        Rails.logger.info("#{listener.display_name} song_uri: #{listener.song_uri}")
-        Rails.logger.info("#{listener.broadcaster.display_name} changed song: #{listener.broadcaster.changed_song?}")
-        Rails.logger.info("#{listener.broadcaster.display_name} last song: #{listener.broadcaster.last_song_uri}")
-        Rails.logger.info("#{listener.broadcaster.display_name} current song: #{listener.broadcaster.last_song_uri}")
-        listener.update(broadcaster: nil)
-      end
-    end
-  end
-
-  def resync_listeners_who_hit_end_of_song
-    listeners_whose_music_is_paused.each do |listener|
-      if broadcaster_started_new_song?(listener)
-        SpotifyService.new(listener).listen_along(
-          broadcaster: listener.broadcaster
-        )
+      if listener.broadcaster_started_new_song?
+        listener.resync_with_broadcaster!
+      elsif listener.may_have_intentionally_paused?
+        listener.update(maybe_intentionally_paused: true)
+      elsif listener.intentionally_paused?
+        listener.stop_listening_along!
       end
     end
   end
 
   def resync_listeners_whose_broadcaster_started_a_new_song
     listeners.each do |listener|
-      if broadcaster_started_new_song?(listener)
+      if listener.broadcaster_started_new_song?
         SpotifyService.new(listener).listen_along(
           broadcaster: listener.broadcaster,
         )
@@ -75,16 +62,6 @@ class UpdatePlaybackService
 
   def tell_clients_to_refresh_their_listener_list
     ActionCable.server.broadcast('spotify_users_channel', {})
-  end
-
-  def listener_started_new_song?(listener)
-    !listener.broadcaster.changed_song? &&
-      !listener.on_same_song_as_broadcaster?
-  end
-
-  def broadcaster_started_new_song?(listener)
-    listener.broadcaster&.changed_song? &&
-      !listener.on_same_song_as_broadcaster?
   end
 
   def listeners

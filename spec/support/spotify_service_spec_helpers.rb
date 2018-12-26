@@ -158,10 +158,10 @@ def get_playback_response(spotify_user, overwrites)
   {
     status: 200,
     body: {
-      is_playing: spotify_user.is_listening,
-      progress_ms: spotify_user.millisecond_progress_into_song,
+      is_playing: overwrites[:is_listening] || spotify_user.is_listening,
+      progress_ms: overwrites[:millisecond_progress_into_song] || spotify_user.millisecond_progress_into_song,
       item: {
-        name: spotify_user.song_name,
+        name: overwrites[:song_name] || spotify_user.song_name,
         uri: overwrites[:song_uri] || spotify_user.song_uri,
         album: {
           images: [{
