@@ -10,7 +10,8 @@ ActiveAdmin.register SpotifyUser do
     :is_listening,
     :broadcaster,
     :display_name,
-    :avatar_url
+    :avatar_url,
+    :listen_along_token
 
   index do
     actions
