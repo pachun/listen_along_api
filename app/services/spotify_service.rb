@@ -187,7 +187,13 @@ class SpotifyService
     end
 
     def avatar_url
-      @avatar_url ||= username_request["images"]&.first&.dig("url")
+      return @avatar_url if @avatar_url.present?
+
+      if username_request["images"].length == 0
+        @avatar_url = SpotifyUser::DEFAULT_AVATAR_URL
+      else
+        @avatar_url = username_request["images"]&.first&.dig("url")
+      end
     end
 
     def username_request

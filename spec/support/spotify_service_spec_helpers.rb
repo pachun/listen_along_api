@@ -106,6 +106,12 @@ module SpotifyServiceSpecHelpers
   end
 
   def stub_spotify_username_request(args = {})
+    if args[:avatar_url]
+      @images = [ "url": args[:avatar_url] ]
+    else
+      @images = []
+    end
+
     stub_request(
       :get,
       "https://api.spotify.com/v1/me",
@@ -114,7 +120,7 @@ module SpotifyServiceSpecHelpers
       body: {
         "id": args[:spotify_username],
         "display_name": args[:full_name],
-        "images": [ "url": args[:avatar_url] ],
+        "images": @images,
       }.to_json,
     )
   end
