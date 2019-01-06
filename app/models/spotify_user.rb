@@ -1,6 +1,8 @@
 class SpotifyUser < ApplicationRecord
   DEFAULT_AVATAR_URL = "https://ubisoft-avatars.akamaized.net/454ea9c3-4b1a-4dbf-aa1b-0552fb994ce9/default_146_146.png"
 
+  belongs_to :spotify_app
+
   has_many :listeners,
     class_name: "SpotifyUser",
     foreign_key: :spotify_user_id

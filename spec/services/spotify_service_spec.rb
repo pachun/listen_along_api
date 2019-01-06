@@ -2,8 +2,10 @@ require "rails_helper"
 
 describe SpotifyService do
   describe "self.authenticate(using_authorization_code:)" do
-    context "the spotify user has authenticate using another device before" do
+    context "the spotify user has authenticated using another device before" do
       it "does not reset their listen along token" do
+        registering_spotify_user = create :registering_spotify_user
+
         original_token = "original_token"
 
         spotify_user = create :spotify_user,
@@ -11,6 +13,7 @@ describe SpotifyService do
           listen_along_token: original_token
 
         stub_get_access_token_request(
+          registering_spotify_user: registering_spotify_user,
           authorization_code: "auth_code",
           access_token: "t1"
         )
@@ -20,14 +23,25 @@ describe SpotifyService do
           spotify_username: "spotify_guy",
         )
 
-        SpotifyService.authenticate(using_authorization_code: "auth_code")
+        SpotifyService.authenticate(
+          registering_spotify_user: registering_spotify_user,
+          using_authorization_code: "auth_code",
+        )
 
         expect(spotify_user.reload.listen_along_token).to eq(original_token)
       end
     end
 
     it "finishes authenticating the spotify user and saves their credentials" do
+      spotify_app_1 = create :spotify_app,
+        client_identifier: "client_id_1",
+        client_secret: "client_secret_1"
+
+      registering_spotify_user_1 = create :registering_spotify_user,
+        spotify_app: spotify_app_1
+
       access_token_request = stub_get_access_token_request(
+        registering_spotify_user: registering_spotify_user_1,
         authorization_code: "auth_code",
         access_token: "access token 1",
         refresh_token: "refresh token 1",
@@ -39,6 +53,7 @@ describe SpotifyService do
       )
 
       spotify_user_1 = SpotifyService.authenticate(
+        registering_spotify_user: registering_spotify_user_1,
         using_authorization_code: "auth_code",
       )
 
@@ -46,8 +61,17 @@ describe SpotifyService do
       expect(spotify_user_1.access_token).to eq("access token 1")
       expect(spotify_user_1.refresh_token).to eq("refresh token 1")
       expect(spotify_user_1.listen_along_token.length).to eq(32)
+      expect(spotify_user_1.spotify_app).to eq(spotify_app_1)
+
+      spotify_app_2 = create :spotify_app,
+        client_identifier: "client_id_2",
+        client_secret: "client_secret_2"
+
+      registering_spotify_user_2 = create :registering_spotify_user,
+        spotify_app: spotify_app_2
 
       access_token_request = stub_get_access_token_request(
+        registering_spotify_user: registering_spotify_user_2,
         authorization_code: "auth_code_2",
         access_token: "access token 2",
         refresh_token: "refresh token 2",
@@ -59,6 +83,7 @@ describe SpotifyService do
       )
 
       spotify_user_2 = SpotifyService.authenticate(
+        registering_spotify_user: registering_spotify_user_2,
         using_authorization_code: "auth_code_2",
       )
 
@@ -67,6 +92,7 @@ describe SpotifyService do
       expect(spotify_user_2.access_token).to eq("access token 2")
       expect(spotify_user_2.refresh_token).to eq("refresh token 2")
       expect(spotify_user_2.listen_along_token.length).to eq(32)
+      expect(spotify_user_2.spotify_app).to eq(spotify_app_2)
 
       expect(spotify_user_1.listen_along_token).not_to(
         eq(spotify_user_2.listen_along_token)
@@ -74,7 +100,9 @@ describe SpotifyService do
     end
 
     it "saves the spotify user's avatar url" do
+      registering_spotify_user = create :registering_spotify_user
       spotify_authentication_token_request = stub_get_access_token_request(
+        registering_spotify_user: registering_spotify_user,
         authorization_code: "auth_code",
         access_token: "access token",
         refresh_token: "refresh token",
@@ -85,7 +113,10 @@ describe SpotifyService do
         avatar_url: "http://x.y.z.jpg",
       )
 
-      SpotifyService.authenticate(using_authorization_code: "auth_code")
+      SpotifyService.authenticate(
+        registering_spotify_user: registering_spotify_user,
+        using_authorization_code: "auth_code",
+      )
 
       expect(spotify_username_request).to have_been_requested
       expect(spotify_authentication_token_request).to have_been_requested
@@ -94,7 +125,9 @@ describe SpotifyService do
 
     context "the spotify user has no avatar" do
       it "saves a default avatar url" do
+        registering_spotify_user = create :registering_spotify_user
         spotify_authentication_token_request = stub_get_access_token_request(
+          registering_spotify_user: registering_spotify_user,
           authorization_code: "auth_code",
           access_token: "access token",
           refresh_token: "refresh token",
@@ -104,7 +137,10 @@ describe SpotifyService do
           spotify_username: "121613941",
         )
 
-        SpotifyService.authenticate(using_authorization_code: "auth_code")
+        SpotifyService.authenticate(
+          registering_spotify_user: registering_spotify_user,
+          using_authorization_code: "auth_code",
+        )
 
         expect(spotify_username_request).to have_been_requested
         expect(spotify_authentication_token_request).to have_been_requested
@@ -115,7 +151,9 @@ describe SpotifyService do
     end
 
     it "saves the spotify user's real full name" do
+      registering_spotify_user = create :registering_spotify_user
       stub_get_access_token_request(
+        registering_spotify_user: registering_spotify_user,
         authorization_code: "auth_code",
         access_token: "access token",
         refresh_token: "refresh token",
@@ -126,13 +164,18 @@ describe SpotifyService do
         full_name: "Brian Voskerijian",
       )
 
-      SpotifyService.authenticate(using_authorization_code: "auth_code")
+      SpotifyService.authenticate(
+        registering_spotify_user: registering_spotify_user,
+        using_authorization_code: "auth_code",
+      )
 
       expect(SpotifyUser.last.display_name).to eq("Brian Voskerijian")
     end
 
     it "creates only one spotify credential per spotify user" do
+      registering_spotify_user = create :registering_spotify_user
       spotify_authentication_token_request = stub_get_access_token_request(
+        registering_spotify_user: registering_spotify_user,
         authorization_code: "auth_code",
         access_token: "access token",
         refresh_token: "refresh token",
@@ -142,7 +185,10 @@ describe SpotifyService do
         spotify_username: "spotify_username",
       )
 
-      SpotifyService.authenticate(using_authorization_code: "auth_code")
+      SpotifyService.authenticate(
+        registering_spotify_user: registering_spotify_user,
+        using_authorization_code: "auth_code",
+      )
 
       expect(spotify_username_request).to have_been_requested
       expect(spotify_authentication_token_request).to have_been_requested
@@ -152,6 +198,7 @@ describe SpotifyService do
       expect(SpotifyUser.count).to eq(1)
 
       spotify_authentication_token_request_2 = stub_get_access_token_request(
+        registering_spotify_user: registering_spotify_user,
         authorization_code: "auth_code_2",
         access_token: "access token 2",
         refresh_token: "refresh token 2",
@@ -161,7 +208,10 @@ describe SpotifyService do
         spotify_username: "spotify_username",
       )
 
-      SpotifyService.authenticate(using_authorization_code: "auth_code_2")
+      SpotifyService.authenticate(
+        registering_spotify_user: registering_spotify_user,
+        using_authorization_code: "auth_code_2",
+      )
 
       expect(spotify_authentication_token_request_2).to have_been_requested
       expect(SpotifyUser.last.access_token).to eq("access token 2")
@@ -196,6 +246,7 @@ describe SpotifyService do
             expired_access_token: true,
           )
           stub_refresh_access_token_request(
+            spotify_app: spotify_user.spotify_app,
             refresh_token: spotify_user.refresh_token,
             refreshed_access_token: refreshed_access_token,
           )
@@ -373,6 +424,7 @@ describe SpotifyService do
           millisecond_progress: 20000,
         )
         stub_refresh_access_token_request(
+          spotify_app: listener.spotify_app,
           refresh_token: listener.refresh_token,
           refreshed_access_token: refreshed_access_token,
         )

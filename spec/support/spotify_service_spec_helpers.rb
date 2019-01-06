@@ -73,7 +73,7 @@ module SpotifyServiceSpecHelpers
         "refresh_token": args[:refresh_token],
       },
       headers: {
-        "Authorization": "Basic #{unauthenticated_request_header}",
+        "Authorization": "Basic #{unauthenticated_request_header(args[:spotify_app])}",
         "Content-Type": "application/x-www-form-urlencoded",
       }
     ).to_return(
@@ -88,7 +88,7 @@ module SpotifyServiceSpecHelpers
       "https://accounts.spotify.com/api/token"
     ).with(
       headers: {
-        "Authorization": "Basic #{unauthenticated_request_header}",
+        "Authorization": "Basic #{unauthenticated_request_header(args[:registering_spotify_user].spotify_app)}",
         "Content-Type": "application/x-www-form-urlencoded",
       },
       body: {
@@ -126,9 +126,11 @@ module SpotifyServiceSpecHelpers
   end
 end
 
-def unauthenticated_request_header
+def unauthenticated_request_header(spotify_app)
+  client_id = spotify_app.client_identifier
+  client_secret = spotify_app.client_secret
   Base64.urlsafe_encode64(
-    "#{ENV["SPOTIFY_CLIENT_ID"]}:#{ENV["SPOTIFY_CLIENT_SECRET"]}"
+    "#{client_id}:#{client_secret}"
   )
 end
 

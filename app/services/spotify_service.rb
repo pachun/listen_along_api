@@ -1,16 +1,38 @@
 class SpotifyService
+  OAUTH_URL = "https://accounts.spotify.com/authorize"
   SPOTIFY_API_URL = "https://api.spotify.com"
   CURRENTLY_PLAYING_SONG_ENDPOINT = "/v1/me/player/currently-playing"
   PLAY_SONG_ENDPOINT = "/v1/me/player/play"
   SPOTIFY_USERNAME_ENDPOINT = "/v1/me"
   SPOTIFY_AUTHORIZATION_URL = "https://accounts.spotify.com/api/token"
   REPEAT_OFF_ENDPOINT = "/v1/me/player/repeat?state=off"
-  AUTHENTICATING_HEADER = "Basic #{Base64.urlsafe_encode64(
-    "#{ENV["SPOTIFY_CLIENT_ID"]}:#{ENV["SPOTIFY_CLIENT_SECRET"]}"
-  )}"
 
-  def self.authenticate(using_authorization_code:)
+  def self.oauth_url(registering_spotify_user:)
+    scopes = [
+      "user-read-currently-playing",
+      "user-modify-playback-state",
+      "user-read-playback-state",
+    ]
+
+    redirect_uri = "#{URI.encode(ENV["API_URL"])}/spotify_authentication"
+
+    params = [
+      ["client_id", registering_spotify_user.spotify_app.client_identifier],
+      ["response_type", "code"],
+      ["redirect_uri", redirect_uri],
+      ["scope", scopes.join("%20")],
+      ["state", registering_spotify_user.identifier]
+    ]
+
+    params.each_with_index.inject(OAUTH_URL) do |previous, iterator|
+      param, index = iterator
+      previous + (index == 0 ? "?" : "&") + param.join("=")
+    end
+  end
+
+  def self.authenticate(registering_spotify_user:, using_authorization_code:)
     SpotifyAuthenticationService.authenticate(
+      registering_spotify_user: registering_spotify_user,
       using_authorization_code: using_authorization_code
     )
   end
@@ -90,9 +112,15 @@ class SpotifyService
     end
   end
 
+  def authenticating_header
+    client_id = spotify_user.spotify_app.client_identifier
+    client_secret = spotify_user.spotify_app.client_secret
+    "Basic #{Base64.urlsafe_encode64("#{client_id}:#{client_secret}")}"
+  end
+
   def refreshed_access_token_request
     Faraday.post(SpotifyService::SPOTIFY_AUTHORIZATION_URL) do |req|
-      req.headers["Authorization"] = AUTHENTICATING_HEADER
+      req.headers["Authorization"] = authenticating_header
       req.headers["Content-Type"] = "application/x-www-form-urlencoded"
       req.body = refresh_access_token_request_body
     end
@@ -122,13 +150,14 @@ class SpotifyService
   end
 
   class SpotifyAuthenticationService
-    def self.authenticate(using_authorization_code:)
-      new(using_authorization_code).authenticate
+    def self.authenticate(registering_spotify_user:, using_authorization_code:)
+      new(registering_spotify_user, using_authorization_code).authenticate
     end
 
-    attr_reader :authorization_code
+    attr_reader :authorization_code, :registering_spotify_user
 
-    def initialize(authorization_code)
+    def initialize(registering_spotify_user, authorization_code)
+      @registering_spotify_user = registering_spotify_user
       @authorization_code = authorization_code
     end
 
@@ -150,6 +179,7 @@ class SpotifyService
 
     def create_new_spotify_user
       SpotifyUser.create(
+        spotify_app: registering_spotify_user.spotify_app,
         username: spotify_username,
         display_name: display_name,
         access_token: access_token,
@@ -208,11 +238,17 @@ class SpotifyService
       @spotify_user_json ||= JSON.parse(spotify_token_request.body)
     end
 
+    def authenticating_header
+      client_id = registering_spotify_user.spotify_app.client_identifier
+      client_secret = registering_spotify_user.spotify_app.client_secret
+      "Basic #{Base64.urlsafe_encode64("#{client_id}:#{client_secret}")}"
+    end
+
     def spotify_token_request
       @spotify_token_request ||= Faraday
         .post(SPOTIFY_AUTHORIZATION_URL) do |req|
         req.headers["Content-Type"] = "application/x-www-form-urlencoded"
-        req.headers["Authorization"] = AUTHENTICATING_HEADER
+        req.headers["Authorization"] = authenticating_header
         req.body = {
           "grant_type": "authorization_code",
           "code": authorization_code,

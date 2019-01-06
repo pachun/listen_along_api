@@ -2,28 +2,106 @@ require "rails_helper"
 
 describe "Spotify authentication" do
   describe "GET #index with a ?code=auth_code parameter" do
-    context "with a ?state=broadcaster url parameter" do
-      it "redirects to /listen_along?broadcaster=spotify_username&listener=spotify_username" do
-        auth_code = "auth_code"
-        listener = create :spotify_user,
-          listen_along_token: "listener_token"
+    it "authenticates the registering user" do
+      allow(SpotifyService).to receive(:authenticate).and_call_original
+      registering_spotify_user = create :registering_spotify_user,
+        identifier: "abcde"
+      stub_get_access_token_request(
+        registering_spotify_user: registering_spotify_user,
+        authorization_code: "12345",
+        access_token: "access_token",
+        refresh_token: "refresh_token",
+      )
+      stub_spotify_username_request(
+        access_token: "access_token",
+        spotify_username: "nick",
+      )
 
-        allow(SpotifyService).to receive(:authenticate)
-          .with(using_authorization_code: auth_code)
-          .and_return(listener)
+      get "/spotify_authentication?state=abcde&code=12345"
 
-        get "/spotify_authentication?code=#{auth_code}&state=broadcaster_username"
+      expect(SpotifyService).to have_received(:authenticate).with(
+        registering_spotify_user: registering_spotify_user,
+        using_authorization_code: "12345",
+      )
+    end
 
-        redirect_params = Rack::Utils.parse_query(
-          URI.parse(response.location).query
+    it "deletes the registering user" do
+      allow(SpotifyService).to receive(:authenticate).and_call_original
+      registering_spotify_user = create :registering_spotify_user,
+        identifier: "abcde"
+      stub_get_access_token_request(
+        registering_spotify_user: registering_spotify_user,
+        authorization_code: "12345",
+        access_token: "access_token",
+        refresh_token: "refresh_token",
+      )
+      stub_spotify_username_request(
+        access_token: "access_token",
+        spotify_username: "nick",
+      )
+      stub_currently_playing_request(access_token: "access_token")
+
+      expect {
+        get "/spotify_authentication?state=abcde&code=12345"
+      }.to change { RegisteringSpotifyUser.count }.from(1).to(0)
+    end
+
+    it "redirects back to the client react app" do
+      registering_spotify_user = create :registering_spotify_user,
+        identifier: "abcde"
+      stub_get_access_token_request(
+        registering_spotify_user: registering_spotify_user,
+        authorization_code: "12345",
+        access_token: "access_token",
+        refresh_token: "refresh_token",
+      )
+      stub_spotify_username_request(
+        access_token: "access_token",
+        spotify_username: "nick",
+      )
+      stub_currently_playing_request(access_token: "access_token")
+
+      get "/spotify_authentication?state=abcde&code=12345"
+
+      expect(response).to redirect_to("#{ENV["CLIENT_URL"]}?token=#{SpotifyUser.last.listen_along_token}")
+    end
+
+    context "when the registering spotify user has a broadcaster" do
+      it "starts listening along with the broadcaster" do
+        allow(SpotifyService).to receive(:authenticate).and_call_original
+        broadcaster = create :spotify_user,
+          is_listening: true,
+          username: "broadcaster",
+          access_token: "b_token"
+        registering_spotify_user = create :registering_spotify_user,
+          identifier: "abcde",
+          broadcaster_username: "broadcaster"
+        stub_get_access_token_request(
+          registering_spotify_user: registering_spotify_user,
+          authorization_code: "12345",
+          access_token: "access_token",
+          refresh_token: "refresh_token",
+        )
+        stub_spotify_username_request(
+          access_token: "access_token",
+          spotify_username: "nick",
+        )
+        stub_currently_playing_request(access_token: "access_token")
+        stub_get_playback_request(broadcaster)
+
+        stub_request(
+          :put,
+          "https://api.spotify.com/v1/me/player/repeat?state=off",
+        ).with(
+          headers: { "Authorization": "Bearer access_token" },
         )
 
-        expect(response).to redirect_to %r(/listen_along)
-        expect(redirect_params).to eq(
-          "broadcaster" => "broadcaster_username",
-          "listener_token" => "listener_token",
-          "authenticating" => "true",
-        )
+        listen_along_request = stub_request(:put, "https://api.spotify.com/v1/me/player/play")
+          .with(headers: { 'Authorization'=>'Bearer access_token' })
+
+        get "/spotify_authentication?state=abcde&code=12345"
+
+        expect(listen_along_request).to have_been_requested
       end
     end
   end

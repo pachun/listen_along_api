@@ -11,7 +11,8 @@ ActiveAdmin.register SpotifyUser do
     :broadcaster,
     :display_name,
     :avatar_url,
-    :listen_along_token
+    :listen_along_token,
+    :spotify_app
 
   index do
     actions
@@ -22,6 +23,7 @@ ActiveAdmin.register SpotifyUser do
     column :millisecond_progress_into_song
     column :is_listening
     column :username
+    column :spotify_app
   end
 
   form do |f|
