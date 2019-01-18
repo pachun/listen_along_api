@@ -18,11 +18,7 @@ class SpotifyAuthenticationController < ApiController
   end
 
   def listen_along
-    if broadcaster.present?
-      SpotifyService.new(spotify_user).listen_along(
-        broadcaster: broadcaster,
-      )
-    end
+    spotify_user.listen_to!(broadcaster) if broadcaster.present?
   end
 
   def broadcaster

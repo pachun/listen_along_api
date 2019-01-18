@@ -53,9 +53,7 @@ class UpdatePlaybackService
   def resync_listeners_whose_broadcaster_started_a_new_song
     listeners.each do |listener|
       if listener.broadcaster_started_new_song?
-        SpotifyService.new(listener).listen_along(
-          broadcaster: listener.broadcaster,
-        )
+        listener.resync_with_broadcaster!
       end
     end
   end

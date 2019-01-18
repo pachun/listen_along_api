@@ -1,12 +1,14 @@
 class ListenAlongController < ApiController
   def index
-    SpotifyService.new(listener).listen_along(broadcaster: broadcaster)
+    listener.listen_to!(broadcaster)
   end
 
   private
 
   def listener
-    @listener ||= SpotifyUser.find_by(listen_along_token: listen_along_params[:listener_token])
+    @listener ||= SpotifyUser.find_by(
+      listen_along_token: listen_along_params[:listener_token]
+    )
   end
 
   def broadcaster

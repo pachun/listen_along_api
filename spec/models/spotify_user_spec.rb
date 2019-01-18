@@ -1,6 +1,25 @@
 require "rails_helper"
 
 describe SpotifyUser do
+  describe "#listen_to!(broadcaster)" do
+    it "syncs with and begins listening to the broadcasters playback" do
+
+      listener = create :spotify_user
+      broadcaster = create :spotify_user
+
+      spotify_service_double = instance_double(SpotifyService)
+      allow(SpotifyService).to receive(:new)
+        .with(listener)
+        .and_return(spotify_service_double)
+      allow(spotify_service_double).to receive(:listen_along)
+
+      listener.listen_to!(broadcaster)
+
+      expect(spotify_service_double).to have_received(:listen_along)
+        .with(broadcaster: broadcaster)
+    end
+  end
+
   describe "#stop_listening_along!" do
     it "stops listening along" do
       broadcaster = create :spotify_user,

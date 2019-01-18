@@ -12,6 +12,10 @@ class SpotifyUser < ApplicationRecord
     foreign_key: :spotify_user_id,
     required: false
 
+  def listen_to!(spotify_user)
+    SpotifyService.new(self).listen_along(broadcaster: spotify_user)
+  end
+
   def listening?
     is_listening
   end
@@ -43,7 +47,9 @@ class SpotifyUser < ApplicationRecord
   end
 
   def may_have_intentionally_paused?
-    !is_listening && !broadcaster_started_new_song? && !maybe_intentionally_paused
+    !is_listening &&
+      !broadcaster_started_new_song? &&
+      !maybe_intentionally_paused
   end
 
   def intentionally_paused?
