@@ -1,4 +1,11 @@
 module SpotifyServiceSpecHelpers
+  def stub_spotify_service_listen_alongs
+    spotify_service_double = instance_double(SpotifyService)
+    allow(SpotifyService).to receive(:new)
+      .and_return(spotify_service_double)
+    allow(spotify_service_double).to receive(:listen_along)
+  end
+
   def stub_stop_playback_loop_request(spotify_user)
     stub_request(
       :put,

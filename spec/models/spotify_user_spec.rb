@@ -1,9 +1,68 @@
 require "rails_helper"
 
 describe SpotifyUser do
+  include ActiveSupport::Testing::TimeHelpers
+
+  describe "#time_spent_listening_to(spotify_user)" do
+    it "records the duration of the listen along" do
+      stub_spotify_service_listen_alongs
+
+      listener_1 = create :spotify_user
+      broadcaster_1 = create :spotify_user
+      begin_listening_time = 10.minutes.from_now
+      stop_listening_time = begin_listening_time + 5.minutes
+
+      travel_to(begin_listening_time) do
+        listener_1.listen_to!(broadcaster_1)
+      end
+      travel_to(stop_listening_time) do
+        listener_1.stop_listening_along!
+      end
+
+      expect(listener_1.time_spent_listening_to(broadcaster_1)).to eq(300)
+
+      listener_2 = create :spotify_user
+      broadcaster_2 = create :spotify_user
+      begin_listening_time = 10.minutes.from_now
+      stop_listening_time = begin_listening_time + 10.minutes
+
+      travel_to(begin_listening_time) do
+        listener_2.listen_to!(broadcaster_2)
+      end
+      travel_to(stop_listening_time) do
+        listener_2.stop_listening_along!
+      end
+
+      expect(listener_2.time_spent_listening_to(broadcaster_2)).to eq(600)
+    end
+
+    context "the listener has listened to the same broadcaster before" do
+      it "records cumulative listen along durations" do
+        stub_spotify_service_listen_alongs
+
+        listener = create :spotify_user
+        broadcaster = create :spotify_user
+        begin_listening_time = 10.minutes.from_now
+        stop_listening_time = begin_listening_time + 5.minutes
+        create :listen_along_details,
+          listener: listener,
+          broadcaster: broadcaster,
+          duration: 300
+
+        travel_to(begin_listening_time) do
+          listener.listen_to!(broadcaster)
+        end
+        travel_to(stop_listening_time) do
+          listener.stop_listening_along!
+        end
+
+        expect(listener.time_spent_listening_to(broadcaster)).to eq(600)
+      end
+    end
+  end
+
   describe "#listen_to!(broadcaster)" do
     it "syncs with and begins listening to the broadcasters playback" do
-
       listener = create :spotify_user
       broadcaster = create :spotify_user
 
@@ -18,6 +77,19 @@ describe SpotifyUser do
       expect(spotify_service_double).to have_received(:listen_along)
         .with(broadcaster: broadcaster)
     end
+
+    it "sets the listeners broadcaster" do
+      stub_spotify_service_listen_alongs
+
+      listener = create :spotify_user
+      broadcaster = create :spotify_user
+
+      listener.listen_to!(broadcaster)
+
+      listener.reload
+
+      expect(listener.broadcaster).to eq(broadcaster)
+    end
   end
 
   describe "#stop_listening_along!" do
@@ -26,6 +98,8 @@ describe SpotifyUser do
         maybe_intentionally_paused: true
       spotify_user = create :spotify_user,
         broadcaster: broadcaster
+      stub_spotify_service_listen_alongs
+      spotify_user.listen_to!(broadcaster)
 
       spotify_user.stop_listening_along!
 

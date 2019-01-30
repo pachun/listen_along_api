@@ -83,6 +83,11 @@ describe UpdatePlaybackService do
           song_uri: a_different_uri,
           broadcaster: broadcaster
 
+        create :listen_along_details,
+          listener: listener_who_played_new_song,
+          broadcaster: broadcaster,
+          listen_along_start_time: 10.seconds.ago
+
         stub_get_playback_request(broadcaster)
         stub_get_playback_request(listener_who_played_new_song)
 
@@ -263,6 +268,11 @@ describe UpdatePlaybackService do
           is_listening: true
         listener = create :spotify_user,
           broadcaster: broadcaster
+
+        create :listen_along_details,
+          listener: listener,
+          broadcaster: broadcaster,
+          listen_along_start_time: 10.seconds.ago
 
         broadcaster_spotify_service = instance_double(SpotifyService)
         allow(SpotifyService).to receive(:new).with(broadcaster)

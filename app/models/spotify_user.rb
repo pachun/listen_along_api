@@ -12,8 +12,36 @@ class SpotifyUser < ApplicationRecord
     foreign_key: :spotify_user_id,
     required: false
 
+  def time_spent_listening_to(spotify_user)
+    ListenAlongDetails.find_by(
+      listener: self,
+      broadcaster: spotify_user,
+    ).duration
+  end
+
   def listen_to!(spotify_user)
+    update(broadcaster: spotify_user)
     SpotifyService.new(self).listen_along(broadcaster: spotify_user)
+    ListenAlongDetails.find_or_create_by(
+      listener: self,
+      broadcaster: spotify_user,
+    ).update(
+      listen_along_start_time: Time.now,
+    )
+  end
+
+  def stop_listening_along!
+    details = listen_along_details
+
+    details.update(
+      duration: (
+        (Time.now - details.listen_along_start_time) \
+        + details.duration
+    ))
+    update(
+      maybe_intentionally_paused: false,
+      broadcaster: nil,
+    )
   end
 
   def listening?
@@ -61,10 +89,12 @@ class SpotifyUser < ApplicationRecord
       !on_same_song_as_broadcaster?
   end
 
-  def stop_listening_along!
-    update(
-      maybe_intentionally_paused: false,
-      broadcaster: nil,
+  private
+
+  def listen_along_details(spotify_user = broadcaster)
+    ListenAlongDetails.find_by(
+      listener: self,
+      broadcaster: spotify_user,
     )
   end
 end
