@@ -2,40 +2,22 @@ require "rails_helper"
 
 describe UpdatePlaybackService do
   describe "self.update" do
-    it "saves song artists" do
+    it "updates spotify user's playbacks" do
       spotify_user = create :spotify_user,
-        is_listening: true,
-        access_token: "t1"
+        is_listening: true
 
-      stub_get_playback_request(spotify_user, song_artists: ["one", "two"])
-
-      UpdatePlaybackService.update
-
-      expect(spotify_user.reload.song_artists).to eq(["one", "two"])
-
-      stub_get_playback_request(spotify_user, song_artists: ["three", "four"])
+      stub_get_playback_request(
+        spotify_user,
+        song_artists: ["a1", "a2"],
+        album_url: "album_cover_url",
+      )
 
       UpdatePlaybackService.update
 
-      expect(spotify_user.reload.song_artists).to eq(["three", "four"])
-    end
+      spotify_user.reload
 
-    it "saves song album cover urls" do
-      spotify_user = create :spotify_user,
-        is_listening: true,
-        access_token: "t1"
-
-      stub_get_playback_request(spotify_user, album_url: "http://x.y.z.jpg")
-
-      UpdatePlaybackService.update
-
-      expect(spotify_user.reload.song_album_cover_url).to eq("http://x.y.z.jpg")
-
-      stub_get_playback_request(spotify_user, album_url: "another_url")
-
-      UpdatePlaybackService.update
-
-      expect(spotify_user.reload.song_album_cover_url).to eq("another_url")
+      expect(spotify_user.song_artists).to eq(["a1", "a2"])
+      expect(spotify_user.song_album_cover_url).to eq("album_cover_url")
     end
 
     it "tells clients to refresh their listener list" do
@@ -44,33 +26,12 @@ describe UpdatePlaybackService do
       }.to have_broadcasted_to("spotify_users_channel").with({})
     end
 
-    it "moves song_uri into last_song_uri" do
-      spotify_user_1 = create :spotify_user,
-        access_token: "t1",
-        song_uri: "a"
-      stub_get_playback_request(spotify_user_1)
-
-      spotify_user_2 = create :spotify_user,
-        access_token: "t1",
-        song_uri: "x"
-      stub_get_playback_request(spotify_user_2)
-
-      UpdatePlaybackService.update
-
-      spotify_user_1.reload
-      spotify_user_2.reload
-
-      expect(spotify_user_1.last_song_uri).to eq("a")
-      expect(spotify_user_2.last_song_uri).to eq("x")
-    end
-
     context "a listener skips to the next song" do
       it "stops syncing them with their broadcaster" do
         broadcasted_uri = "spotify:track:1S4FHBl24uLTzJ37VMBjut"
         a_different_uri = "spotify:track:1xyt3kmjrV3o9kbiAdwdXb"
 
         broadcaster = create :spotify_user,
-          access_token: "t1",
           is_listening: true,
           song_name: "Beam Me Up",
           last_song_uri: broadcasted_uri,
@@ -78,7 +39,6 @@ describe UpdatePlaybackService do
           millisecond_progress_into_song: "10000"
 
         listener_who_played_new_song = create :spotify_user,
-          access_token: "t2",
           is_listening: true,
           song_uri: a_different_uri,
           broadcaster: broadcaster
@@ -106,20 +66,17 @@ describe UpdatePlaybackService do
         a_different_uri = "spotify:track:1xyt3kmjrV3o9kbiAdwdXb"
 
         broadcaster = create :spotify_user,
-          access_token: "t1",
           is_listening: true,
           song_name: "Beam Me Up",
           song_uri: last_broadcasted_uri,
           millisecond_progress_into_song: "10000"
 
         unsynced_listener = create :spotify_user,
-          access_token: "t2",
           is_listening: true,
           song_uri: a_different_uri,
           broadcaster: broadcaster
 
         synced_listener = create :spotify_user,
-          access_token: "t3",
           is_listening: true,
           song_uri: broadcasted_uri,
           broadcaster: broadcaster
@@ -306,14 +263,12 @@ describe UpdatePlaybackService do
       it "keeps the listener in sync with their broadcaster" do
         same_song_uri = "spotify:track:1S4FHBl24uLTzJ37VMBjut"
         broadcaster = create :spotify_user,
-          access_token: "b",
           last_song_uri: same_song_uri,
           is_listening: true,
           song_name: "Beam Me Up",
           song_uri: same_song_uri,
           millisecond_progress_into_song: "10000"
         listener = create :spotify_user,
-          access_token: "l",
           broadcaster: broadcaster
 
         stub_get_playback_request(broadcaster)
@@ -396,5 +351,4 @@ describe UpdatePlaybackService do
       millisecond_progress_into_song: nil,
     }
   end
-
 end

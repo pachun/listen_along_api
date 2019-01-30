@@ -223,15 +223,67 @@ describe SpotifyService do
 
   describe "#current_playback_state" do
     it "sets [:last_song_uri] to the previous song uri" do
-      spotify_user = create :spotify_user,
-        access_token: "t1",
-        song_uri: "last song uri"
+      spotify_user_1 = create :spotify_user,
+        song_uri: "a"
+      stub_get_playback_request(spotify_user_1)
 
-      stub_get_playback_request(spotify_user)
+      spotify_user_2 = create :spotify_user,
+        song_uri: "x"
+      stub_get_playback_request(spotify_user_2)
 
       expect(
-        SpotifyService.new(spotify_user).current_playback_state[:last_song_uri]
-      ).to eq("last song uri")
+        SpotifyService
+          .new(spotify_user_1)
+          .current_playback_state[:last_song_uri]
+      ).to eq("a")
+
+      expect(
+        SpotifyService
+          .new(spotify_user_2)
+          .current_playback_state[:last_song_uri]
+      ).to eq("x")
+    end
+
+    it "sets [:song_artists] to the song artists" do
+      spotify_user = create :spotify_user,
+        is_listening: true
+
+      stub_get_playback_request(spotify_user, song_artists: ["one", "two"])
+
+      expect(
+        SpotifyService
+          .new(spotify_user)
+          .current_playback_state[:song_artists]
+      ).to eq(["one", "two"])
+
+      stub_get_playback_request(spotify_user, song_artists: ["three", "four"])
+
+      expect(
+        SpotifyService
+          .new(spotify_user)
+          .current_playback_state[:song_artists]
+      ).to eq(["three", "four"])
+    end
+
+    it "sets [:song_album_cover_url] to the song album cover url" do
+      spotify_user = create :spotify_user,
+        is_listening: true
+
+      stub_get_playback_request(spotify_user, album_url: "http://x.y.z.jpg")
+
+      expect(
+        SpotifyService
+          .new(spotify_user)
+          .current_playback_state[:song_album_cover_url]
+      ).to eq("http://x.y.z.jpg")
+
+      stub_get_playback_request(spotify_user, album_url: "another_url")
+
+      expect(
+        SpotifyService
+          .new(spotify_user)
+          .current_playback_state[:song_album_cover_url]
+      ).to eq("another_url")
     end
 
     context "the song 'Bone Dry' is playing" do
@@ -344,10 +396,8 @@ describe SpotifyService do
       it "does not make a request to turn off the listener's playback loop" do
         old_broadcaster = create :spotify_user
         listener = create :spotify_user,
-          access_token: "t1",
           broadcaster: old_broadcaster
-        broadcaster = create :spotify_user,
-          access_token: "t2"
+        broadcaster = create :spotify_user
         stub_currently_playing_request(access_token: broadcaster.access_token)
         stub_set_playback_request(
           listener: listener,
@@ -364,10 +414,8 @@ describe SpotifyService do
     context "the listener was not listening to a broadcaster previously" do
       it "turns off the listener's playback loop" do
         listener = create :spotify_user,
-          access_token: "t1",
           broadcaster: nil
-        broadcaster = create :spotify_user,
-          access_token: "t2"
+        broadcaster = create :spotify_user
         stub_currently_playing_request(access_token: broadcaster.access_token)
         stub_set_playback_request(
           listener: listener,

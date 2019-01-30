@@ -71,8 +71,7 @@ describe "Spotify authentication" do
         allow(SpotifyService).to receive(:authenticate).and_call_original
         broadcaster = create :spotify_user,
           is_listening: true,
-          username: "broadcaster",
-          access_token: "b_token"
+          username: "broadcaster"
         registering_spotify_user = create :registering_spotify_user,
           identifier: "abcde",
           broadcaster_username: "broadcaster"

@@ -80,8 +80,8 @@ ActiveRecord::Schema.define(version: 2019_01_30_224202) do
     t.string "song_uri"
     t.string "millisecond_progress_into_song"
     t.boolean "is_listening", default: false
-    t.string "last_song_uri"
     t.string "listen_along_token"
+    t.string "last_song_uri"
     t.string "display_name"
     t.string "avatar_url"
     t.string "song_album_cover_url"

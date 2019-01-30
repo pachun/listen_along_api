@@ -1,4 +1,20 @@
 module SpotifyServiceSpecHelpers
+  # def stub_spotify_service_current_playback_state(spotify_user:, current_playback_state:)
+  #   spotify_service_double = instance_double(SpotifyService)
+  #   allow(SpotifyService).to receive(:new).with(spotify_user)
+  #     .and_return(spotify_service_double)
+  #   allow(spotify_service_double).to(
+  #     receive(:current_playback_state).and_return({
+  #       is_listening: current_playback_state[:is_listening] || false,
+  #       song_name: current_playback_state[:song_name] || "",
+  #       song_uri: current_playback_state[:song_uri] || "",
+  #       millisecond_progress_into_song: \
+  #         current_playback_state[:millisecond_progress_into_song] || nil,
+  #       last_song_uri: current_playback_state[:song_uri] || "",
+  #     })
+  #   )
+  # end
+
   def stub_spotify_service_listen_alongs
     spotify_service_double = instance_double(SpotifyService)
     allow(SpotifyService).to receive(:new)

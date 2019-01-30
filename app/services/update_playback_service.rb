@@ -20,9 +20,7 @@ class UpdatePlaybackService
 
   def update_playback_states
     SpotifyUser.all.each do |spotify_user|
-      spotify_user.update(
-        SpotifyService.new(spotify_user).current_playback_state
-      )
+      spotify_user.update_playback_state
     end
   end
 

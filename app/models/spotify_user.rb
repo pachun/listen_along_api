@@ -13,6 +13,10 @@ class SpotifyUser < ApplicationRecord
     foreign_key: :spotify_user_id,
     required: false
 
+  def update_playback_state
+    update(SpotifyService.new(self).current_playback_state)
+  end
+
   def time_spent_listening_to(spotify_user)
     ListenAlongDetails.find_by(
       listener: self,

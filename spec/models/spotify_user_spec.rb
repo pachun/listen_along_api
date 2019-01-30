@@ -3,6 +3,42 @@ require "rails_helper"
 describe SpotifyUser do
   include ActiveSupport::Testing::TimeHelpers
 
+  describe "#update_playback_state" do
+    it "updates playback state" do
+      spotify_user_1 = create :spotify_user
+      allow(spotify_user_1).to receive(:update)
+
+      expected_playback_state_1 = { playback: :state_1 }
+      spotify_service_double_1 = instance_double(SpotifyService)
+      allow(SpotifyService).to receive(:new)
+        .with(spotify_user_1)
+        .and_return(spotify_service_double_1)
+      allow(spotify_service_double_1).to(
+        receive(:current_playback_state).and_return(expected_playback_state_1)
+      )
+
+      spotify_user_1.update_playback_state
+
+      expect(spotify_user_1).to have_received(:update).with(expected_playback_state_1)
+
+      spotify_user_2 = create :spotify_user
+      allow(spotify_user_2).to receive(:update)
+
+      expected_playback_state_2 = { playback: :state_2 }
+      spotify_service_double_2 = instance_double(SpotifyService)
+      allow(SpotifyService).to receive(:new)
+        .with(spotify_user_2)
+        .and_return(spotify_service_double_2)
+      allow(spotify_service_double_2).to(
+        receive(:current_playback_state).and_return(expected_playback_state_2)
+      )
+
+      spotify_user_2.update_playback_state
+
+      expect(spotify_user_2).to have_received(:update).with(expected_playback_state_2)
+    end
+  end
+
   describe "#time_spent_listening_to(spotify_user)" do
     it "records the duration of the listen along" do
       stub_spotify_service_listen_alongs
