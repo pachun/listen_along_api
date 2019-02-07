@@ -5,7 +5,8 @@ class SpotifyUser < ApplicationRecord
 
   has_many :listeners,
     class_name: "SpotifyUser",
-    foreign_key: :spotify_user_id
+    foreign_key: :spotify_user_id,
+    dependent: :destroy
 
   belongs_to :broadcaster,
     class_name: "SpotifyUser",
