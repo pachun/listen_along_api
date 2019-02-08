@@ -79,9 +79,27 @@ class SpotifyService
   def turn_off_repeat
     if !spotify_user.broadcaster.present?
       url = SpotifyService::SPOTIFY_API_URL + REPEAT_OFF_ENDPOINT
-      Faraday.put(url) do |request|
+      spotify_response = Faraday.put(url) do |request|
         request.headers["Authorization"] = authenticated_header
       end
+      Rails.logger.info({
+        event: {
+          type: "turn_off_repeat",
+          spotify_username: spotify_user.username,
+          request: {
+            url: url,
+            method: "PUT",
+            headers: {
+              "Authorization" => authenticated_header,
+            },
+          },
+          response: {
+            status: spotify_response.status,
+            headers: spotify_response.headers,
+            body: spotify_response.body,
+          },
+        },
+      }.to_json)
     end
   end
 
@@ -97,19 +115,63 @@ class SpotifyService
   end
 
   def listen_along_request(playback_state)
-    Faraday.put(SpotifyService::SPOTIFY_API_URL + PLAY_SONG_ENDPOINT) do |request|
+    url = SpotifyService::SPOTIFY_API_URL + PLAY_SONG_ENDPOINT
+    spotify_response = Faraday.put(url) do |request|
       request.headers["Authorization"] = authenticated_header
       request.body = {
         "uris": [playback_state[:song_uri]],
         "position_ms": playback_state[:millisecond_progress_into_song],
       }.to_json
     end
+    Rails.logger.info({
+      event: {
+        type: "set_playback",
+        spotify_username: spotify_user.username,
+        request: {
+          url: url,
+          method: "PUT",
+          headers: {
+            "Authorization" => authenticated_header,
+          },
+          body: {
+            "uris": [playback_state[:song_uri]],
+            "position_ms": playback_state[:millisecond_progress_into_song],
+          }.to_json,
+        },
+        response: {
+          status: spotify_response.status,
+          headers: spotify_response.headers,
+          body: spotify_response.body,
+        },
+      },
+    }.to_json)
+    spotify_response
   end
 
   def currently_playing_song_request
-    Faraday.get(SpotifyService::SPOTIFY_API_URL + CURRENTLY_PLAYING_SONG_ENDPOINT) do |request|
+    url = SpotifyService::SPOTIFY_API_URL + CURRENTLY_PLAYING_SONG_ENDPOINT
+    spotify_response = Faraday.get(url) do |request|
       request.headers["Authorization"] = authenticated_header
     end
+    Rails.logger.info({
+      event: {
+        type: "get_playback",
+        spotify_username: spotify_user.username,
+        request: {
+          url: url,
+          method: "GET",
+          headers: {
+            "Authorization" => authenticated_header,
+          },
+        },
+        response: {
+          status: spotify_response.status,
+          headers: spotify_response.headers,
+          body: spotify_response.body,
+        },
+      },
+    }.to_json)
+    spotify_response
   end
 
   def authenticating_header
@@ -119,11 +181,33 @@ class SpotifyService
   end
 
   def refreshed_access_token_request
-    Faraday.post(SpotifyService::SPOTIFY_AUTHORIZATION_URL) do |req|
+    url = SpotifyService::SPOTIFY_AUTHORIZATION_URL
+    spotify_response = Faraday.post(url) do |req|
       req.headers["Authorization"] = authenticating_header
       req.headers["Content-Type"] = "application/x-www-form-urlencoded"
       req.body = refresh_access_token_request_body
     end
+    Rails.logger.info({
+      event: {
+        type: "refresh_access_token",
+        spotify_username: spotify_user.username,
+        request: {
+          url: url,
+          method: "POST",
+          headers: {
+            "Authorization" => authenticating_header,
+            "Content-Type" => "application/x-www-form-urlencoded",
+          },
+          body: refresh_access_token_request_body,
+        },
+        response: {
+          status: spotify_response.status,
+          headers: spotify_response.headers,
+          body: spotify_response.body,
+        },
+      },
+    }.to_json)
+    spotify_response
   end
 
   def refresh_access_token_request_body
@@ -227,11 +311,30 @@ class SpotifyService
     end
 
     def username_request
-      @username_request ||= JSON.parse(
-        Faraday.get(SPOTIFY_API_URL + SPOTIFY_USERNAME_ENDPOINT) do |req|
-          req.headers["Authorization"] = "Bearer #{access_token}"
-        end.body
-      )
+      return @username_request if @username_request.present?
+
+      url = SPOTIFY_API_URL + SPOTIFY_USERNAME_ENDPOINT
+      spotify_response = Faraday.get(url) do |req|
+        req.headers["Authorization"] = "Bearer #{access_token}"
+      end
+      Rails.logger.info({
+        event: {
+          type: "username_request",
+          request: {
+            url: url,
+            method: "GET",
+            headers: {
+              "Authorization" => "Bearer #{access_token}",
+            },
+          },
+          response: {
+            status: spotify_response.status,
+            headers: spotify_response.headers,
+            body: spotify_response.body,
+          },
+        },
+      }.to_json)
+      @username_request = JSON.parse(spotify_response.body)
     end
 
     def spotify_user_json
@@ -245,8 +348,11 @@ class SpotifyService
     end
 
     def spotify_token_request
-      @spotify_token_request ||= Faraday
-        .post(SPOTIFY_AUTHORIZATION_URL) do |req|
+      return @spotify_token_request if @spotify_token_request
+
+      url = SPOTIFY_AUTHORIZATION_URL
+      spotify_response = Faraday
+        .post(url) do |req|
         req.headers["Content-Type"] = "application/x-www-form-urlencoded"
         req.headers["Authorization"] = authenticating_header
         req.body = {
@@ -255,6 +361,31 @@ class SpotifyService
           "redirect_uri": "#{ENV["API_URL"]}/spotify_authentication",
         }
       end
+      Rails.logger.info({
+        event: {
+          type: "get_access_token",
+          request: {
+            url: url,
+            method: "POST",
+            headers: {
+              "Content-Type" => "application/x-www-form-urlencoded",
+              "Authorization" => authenticating_header,
+            },
+            body: {
+              "grant_type": "authorization_code",
+              "code": authorization_code,
+              "redirect_uri": "#{ENV["API_URL"]}/spotify_authentication",
+            },
+          },
+          response: {
+            status: spotify_response.status,
+            headers: spotify_response.headers,
+            body: spotify_response.body,
+          },
+        },
+      }.to_json)
+
+      @spotify_token_request = spotify_response
     end
   end
 end
