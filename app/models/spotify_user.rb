@@ -13,6 +13,13 @@ class SpotifyUser < ApplicationRecord
     foreign_key: :spotify_user_id,
     required: false
 
+  scope :active_including_myself, -> (listen_along_token) {
+    SpotifyUser
+      .where(is_listening: true)
+      .or(SpotifyUser.where(listen_along_token: listen_along_token))
+      .order(:display_name)
+  }
+
   def update_playback_state
     update(SpotifyService.new(self).current_playback_state)
   end
@@ -63,10 +70,6 @@ class SpotifyUser < ApplicationRecord
     else
       song_uri == broadcaster.song_uri
     end
-  end
-
-  def number_of_listeners
-    SpotifyUser.where(broadcaster: self).count
   end
 
   def broadcaster_started_new_song?
