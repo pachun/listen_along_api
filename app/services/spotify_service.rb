@@ -167,7 +167,7 @@ class SpotifyService
         response: {
           status: spotify_response.status,
           headers: spotify_response.headers,
-          body: spotify_response.body,
+          body: spotify_response.body.force_encoding("UTF-8"),
         },
       },
     }.to_json)
