@@ -26,9 +26,6 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
-# Rails environment variables
-.env
-
 # html test coverage reports
 coverage
 
