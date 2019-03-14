@@ -17,6 +17,9 @@ ActiveAdmin.register SpotifyUser do
   index do
     actions
     id_column
+    column :has_access_token do |spotify_user|
+      spotify_user.access_token != nil
+    end
     column :display_name
     column :broadcaster
     column :song_name
