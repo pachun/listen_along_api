@@ -88,12 +88,7 @@ describe "Spotify authentication" do
         stub_currently_playing_request(access_token: "access_token")
         stub_get_playback_request(broadcaster)
 
-        stub_request(
-          :put,
-          "https://api.spotify.com/v1/me/player/repeat?state=off",
-        ).with(
-          headers: { "Authorization": "Bearer access_token" },
-        )
+        stub_start_playback_loop_request(access_token: "access_token")
 
         listen_along_request = stub_request(:put, "https://api.spotify.com/v1/me/player/play")
           .with(headers: { 'Authorization'=>'Bearer access_token' })

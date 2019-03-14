@@ -22,12 +22,13 @@ module SpotifyServiceSpecHelpers
     allow(spotify_service_double).to receive(:listen_along)
   end
 
-  def stub_stop_playback_loop_request(spotify_user)
+  def stub_start_playback_loop_request(args = {})
+    access_token = args[:access_token] ? args[:access_token] : args[:spotify_user].access_token
     stub_request(
       :put,
-      "https://api.spotify.com/v1/me/player/repeat?state=off",
+      "https://api.spotify.com/v1/me/player/repeat?state=track",
     ).with(
-      headers: { "Authorization": "Bearer #{spotify_user.access_token}" },
+      headers: { "Authorization": "Bearer #{access_token}" },
     )
   end
 

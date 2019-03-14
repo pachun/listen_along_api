@@ -423,41 +423,20 @@ describe SpotifyService do
   end
 
   describe "#listen_along" do
-    context "the listener was listening to a broadcaster previously" do
-      it "does not make a request to turn off the listener's playback loop" do
-        old_broadcaster = create :spotify_user
-        listener = create :spotify_user,
-          broadcaster: old_broadcaster
-        broadcaster = create :spotify_user
-        stub_currently_playing_request(access_token: broadcaster.access_token)
-        stub_set_playback_request(
-          listener: listener,
-          broadcaster: broadcaster,
-        )
-        stop_playback_loop_request = stub_stop_playback_loop_request(listener)
+    it "turns on the listener's playback loop" do
+      listener = create :spotify_user,
+        broadcaster: nil
+      broadcaster = create :spotify_user
+      stub_currently_playing_request(access_token: broadcaster.access_token)
+      stub_set_playback_request(
+        listener: listener,
+        broadcaster: broadcaster,
+      )
+      start_playback_loop_request = stub_start_playback_loop_request(listener)
 
-        SpotifyService.new(listener).listen_along(broadcaster: broadcaster)
+      SpotifyService.new(listener).listen_along(broadcaster: broadcaster)
 
-        expect(stop_playback_loop_request).not_to have_been_requested
-      end
-    end
-
-    context "the listener was not listening to a broadcaster previously" do
-      it "turns off the listener's playback loop" do
-        listener = create :spotify_user,
-          broadcaster: nil
-        broadcaster = create :spotify_user
-        stub_currently_playing_request(access_token: broadcaster.access_token)
-        stub_set_playback_request(
-          listener: listener,
-          broadcaster: broadcaster,
-        )
-        stop_playback_loop_request = stub_stop_playback_loop_request(listener)
-
-        SpotifyService.new(listener).listen_along(broadcaster: broadcaster)
-
-        expect(stop_playback_loop_request).to have_been_requested
-      end
+      expect(start_playback_loop_request).to have_been_requested
     end
 
     it "sets the listeners broadcaster and playback" do
@@ -469,7 +448,7 @@ describe SpotifyService do
         song_uri: "uri",
         millisecond_progress_into_song: "1000"
       stub_currently_playing_request(access_token: broadcaster.access_token)
-      stub_stop_playback_loop_request(listener)
+      stub_start_playback_loop_request(listener)
       stub_play_request(access_token: listener.access_token)
 
       SpotifyService.new(listener).listen_along(broadcaster: broadcaster)
@@ -502,6 +481,7 @@ describe SpotifyService do
           song_uri: "spotify:track:5k8ljvF1AoEXmdHxll7ReL",
           millisecond_progress: 20000,
         )
+        stub_start_playback_loop_request(access_token: refreshed_access_token)
         stub_refresh_access_token_request(
           spotify_app: listener.spotify_app,
           refresh_token: listener.refresh_token,
@@ -532,7 +512,7 @@ describe SpotifyService do
         )
         listener = create :spotify_user,
           access_token: "access token"
-        stub_stop_playback_loop_request(listener)
+        stub_start_playback_loop_request(listener)
         sync_request = stub_play_request(
           song_uri: "spotify:track:5k8ljvF1AoEXmdHxll7ReL",
           millisecond_progress: 20000,
@@ -557,7 +537,7 @@ describe SpotifyService do
         )
         listener = create :spotify_user,
           access_token: "access token"
-        stub_stop_playback_loop_request(listener)
+        stub_start_playback_loop_request(listener)
         sync_request = stub_play_request(
           access_token: listener.access_token,
           song_uri: "spotify:track:2lxW8vQ9Qjv0qeSQiIBOKJ",

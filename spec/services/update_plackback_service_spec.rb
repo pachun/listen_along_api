@@ -88,6 +88,7 @@ describe UpdatePlaybackService do
         )
         stub_get_playback_request(synced_listener)
         stub_get_playback_request(unsynced_listener)
+        stub_start_playback_loop_request(spotify_user: unsynced_listener)
         stub_set_playback_request(
           listener: unsynced_listener,
           broadcaster: broadcaster,
@@ -300,6 +301,7 @@ describe UpdatePlaybackService do
           broadcaster: broadcaster,
           overwrites: next_song,
         )
+        stub_start_playback_loop_request(spotify_user: listener)
 
         UpdatePlaybackService.update
 

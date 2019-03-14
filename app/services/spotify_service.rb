@@ -5,7 +5,7 @@ class SpotifyService
   PLAY_SONG_ENDPOINT = "/v1/me/player/play"
   SPOTIFY_USERNAME_ENDPOINT = "/v1/me"
   SPOTIFY_AUTHORIZATION_URL = "https://accounts.spotify.com/api/token"
-  REPEAT_OFF_ENDPOINT = "/v1/me/player/repeat?state=off"
+  REPEAT_ON_ENDPOINT = "/v1/me/player/repeat?state=track"
 
   def self.oauth_url(registering_spotify_user:)
     scopes = [
@@ -52,7 +52,7 @@ class SpotifyService
 
   def listen_along(broadcaster:)
     refresh_token_and_listen_along(broadcaster: broadcaster)
-    turn_off_repeat
+    turn_on_repeat
     update_listener_state(broadcaster)
   end
 
@@ -76,31 +76,29 @@ class SpotifyService
     )
   end
 
-  def turn_off_repeat
-    if !spotify_user.broadcaster.present?
-      url = SpotifyService::SPOTIFY_API_URL + REPEAT_OFF_ENDPOINT
-      spotify_response = Faraday.put(url) do |request|
-        request.headers["Authorization"] = authenticated_header
-      end
-      Rails.logger.info({
-        event: {
-          type: "turn_off_repeat",
-          spotify_username: spotify_user.username,
-          request: {
-            url: url,
-            method: "PUT",
-            headers: {
-              "Authorization" => authenticated_header,
-            },
-          },
-          response: {
-            status: spotify_response.status,
-            headers: spotify_response.headers,
-            body: spotify_response.body,
+  def turn_on_repeat
+    url = SpotifyService::SPOTIFY_API_URL + REPEAT_ON_ENDPOINT
+    spotify_response = Faraday.put(url) do |request|
+      request.headers["Authorization"] = authenticated_header
+    end
+    Rails.logger.info({
+      event: {
+        type: "turn_on_repeat",
+        spotify_username: spotify_user.username,
+        request: {
+          url: url,
+          method: "PUT",
+          headers: {
+            "Authorization" => authenticated_header,
           },
         },
-      }.to_json)
-    end
+        response: {
+          status: spotify_response.status,
+          headers: spotify_response.headers,
+          body: spotify_response.body,
+        },
+      },
+    }.to_json)
   end
 
   def song_request
