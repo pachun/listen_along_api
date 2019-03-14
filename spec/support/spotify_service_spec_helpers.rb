@@ -82,7 +82,7 @@ module SpotifyServiceSpecHelpers
       :get,
       "https://api.spotify.com/v1/me/player/currently-playing"
     ).with(
-      headers: { "Authorization": "Bearer #{access_token}" },
+      headers: { "Authorization": "Bearer #{access_token}".strip },
     ).to_return(currently_playing_response(args))
   end
 
@@ -162,6 +162,8 @@ def currently_playing_response(args)
     { status: 401 }
   elsif args[:nothing_playing_response]
     { status: 204 }
+  elsif args[:access_token] == nil
+    { status: 400 }
   else
     {
       status: 200,
