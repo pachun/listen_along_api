@@ -31,16 +31,19 @@ describe SpotifyUsersController do
     end
 
     it "indicates which listener is me" do
+      my_token = "my_token"
+
       create :spotify_user,
         username: "me",
         is_listening: false,
-        listen_along_token: "my_token"
+        listen_along_token: my_token
 
       create :spotify_user,
         username: "someone_else",
         is_listening: true
 
-      get "/spotify_users?token=my_token"
+      get "/spotify_users",
+        headers: { "Authorization": "Bearer #{my_token}"}
 
       me = JSON.parse(response.body).select do |listener|
         listener["is_me"] == true
@@ -60,13 +63,15 @@ describe SpotifyUsersController do
         is_listening: true,
         username: "broadcaster_2"
 
+      my_token = "my_token"
       create :spotify_user,
         is_listening: true,
         username: "me",
-        listen_along_token: "my_token",
+        listen_along_token: my_token,
         broadcaster: broadcaster_1
 
-      get "/spotify_users?token=my_token"
+      get "/spotify_users",
+        headers: { "Authorization": "Bearer #{my_token}"}
 
       broadcaster_json = JSON.parse(response.body).detect do |listener|
         listener["is_me"] == true
@@ -81,9 +86,10 @@ describe SpotifyUsersController do
     it "syncs the listener's Spotify playback with the broadcaster's" do
       broadcaster = create :spotify_user,
         username: "broadcaster"
+      listeners_token = "listeners_token"
       listener = create :spotify_user,
         username: "listener",
-        listen_along_token: "1234"
+        listen_along_token: listeners_token
 
       spotify_service_double = instance_double(SpotifyService)
       allow(SpotifyService).to receive(:new)
@@ -92,10 +98,8 @@ describe SpotifyUsersController do
       allow(spotify_service_double).to receive(:listen_along)
 
       put "/spotify_users/#{listener.id}",
-        params: {
-          broadcaster_username: broadcaster.username,
-          token: listener.listen_along_token,
-        }
+        headers: { "Authorization": "Bearer #{listeners_token}"},
+        params: { broadcaster_username: broadcaster.username }
 
       expect(spotify_service_double).to have_received(:listen_along).with(
         broadcaster: broadcaster,

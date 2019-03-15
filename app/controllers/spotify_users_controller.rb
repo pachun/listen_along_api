@@ -15,7 +15,7 @@ class SpotifyUsersController < ApiController
   private
 
   def spotify_users
-    SpotifyUser.active_including_myself(spotify_user_params[:token])
+    SpotifyUser.active_including_myself(listen_along_token)
   end
 
   def authenticated?
@@ -29,10 +29,14 @@ class SpotifyUsersController < ApiController
   end
 
   def current_spotify_user
-    SpotifyUser.find_by(listen_along_token: spotify_user_params[:token])
+    SpotifyUser.find_by(listen_along_token: listen_along_token)
+  end
+
+  def listen_along_token
+    request.headers["Authorization"]&.split&.last
   end
 
   def spotify_user_params
-    params.permit(:id, :token, :broadcaster_username)
+    params.permit(:id, :broadcaster_username)
   end
 end
