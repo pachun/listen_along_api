@@ -82,7 +82,7 @@ describe SpotifyUsersController do
     end
   end
 
-  describe "PUT #update" do
+  describe "GET /listen_along" do
     it "syncs the listener's Spotify playback with the broadcaster's" do
       broadcaster = create :spotify_user,
         username: "broadcaster"
@@ -97,7 +97,7 @@ describe SpotifyUsersController do
         .and_return(spotify_service_double)
       allow(spotify_service_double).to receive(:listen_along)
 
-      put "/spotify_users/#{listener.id}",
+      get "/listen_along",
         headers: { "Authorization": "Bearer #{listeners_token}"},
         params: { broadcaster_username: broadcaster.username }
 
@@ -121,7 +121,7 @@ describe SpotifyUsersController do
           .and_return(spotify_service_double)
         allow(spotify_service_double).to receive(:listen_along)
 
-        put "/spotify_users/#{listener.id + 1}",
+        get "/listen_along",
           params: {
             broadcaster_username: broadcaster.username,
             token: listener.listen_along_token,

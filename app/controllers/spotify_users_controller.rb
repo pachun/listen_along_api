@@ -19,7 +19,7 @@ class SpotifyUsersController < ApiController
   end
 
   def authenticated?
-    current_spotify_user&.id == spotify_user_params[:id].to_i
+    current_spotify_user.present?
   end
 
   def broadcaster

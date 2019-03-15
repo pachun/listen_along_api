@@ -2,7 +2,8 @@ Rails.application.routes.draw do
   resources :registering_spotify_users, only: [:new]
   resources :spotify_authentication, only: [:index]
 
-  resources :spotify_users, only: [:index, :update]
+  resources :spotify_users, only: [:index]
+  get "listen_along", to: "spotify_users#update"
 
   # untested but required - do not remove:
   mount ActionCable.server => '/cable'
