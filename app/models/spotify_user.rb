@@ -1,6 +1,16 @@
 class SpotifyUser < ApplicationRecord
   DEFAULT_AVATAR_URL = "https://ubisoft-avatars.akamaized.net/454ea9c3-4b1a-4dbf-aa1b-0552fb994ce9/default_146_146.png"
 
+  has_many :broadcasting_histories,
+    class_name: "ListenAlongDetails",
+    foreign_key: :broadcaster_id,
+    dependent: :destroy
+
+  has_many :listening_histories,
+    class_name: "ListenAlongDetails",
+    foreign_key: :listener_id,
+    dependent: :destroy
+
   belongs_to :spotify_app
 
   has_many :listeners,

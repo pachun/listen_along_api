@@ -3,6 +3,32 @@ require "rails_helper"
 describe SpotifyUser do
   include ActiveSupport::Testing::TimeHelpers
 
+  describe ".destroy" do
+    it "destroys associated listening histories" do
+      listener = create :spotify_user
+      broadcaster = create :spotify_user
+      details = create :listen_along_details,
+        broadcaster: broadcaster,
+        listener: listener
+
+      listener.destroy
+
+      expect(ListenAlongDetails.where(id: details.id)).to be_empty
+    end
+
+    it "destroys associated broadcasting histories" do
+      listener = create :spotify_user
+      broadcaster = create :spotify_user
+      details = create :listen_along_details,
+        broadcaster: broadcaster,
+        listener: listener
+
+      broadcaster.destroy
+
+      expect(ListenAlongDetails.where(id: details.id)).to be_empty
+    end
+  end
+
   describe "#update_playback_state" do
     it "updates playback state" do
       spotify_user_1 = create :spotify_user
