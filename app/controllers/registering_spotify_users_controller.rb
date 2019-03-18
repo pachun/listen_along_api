@@ -4,6 +4,7 @@ class RegisteringSpotifyUsersController < ApiController
       spotify_app: spotify_app_with_fewest_users,
       broadcaster_username: registering_user_params[:broadcaster_username],
       identifier: random_identifier,
+      mobile: mobile?,
     )
     redirect_to SpotifyService.oauth_url(
       registering_spotify_user: registering_spotify_user,
@@ -16,8 +17,12 @@ class RegisteringSpotifyUsersController < ApiController
     (0...32).map { ("a".."z").to_a[rand(26)] }.join
   end
 
+  def mobile?
+    registering_user_params[:mobile] == "true"
+  end
+
   def registering_user_params
-    params.permit(:broadcaster_username)
+    params.permit(:broadcaster_username, :mobile)
   end
 
   def spotify_app_with_fewest_users

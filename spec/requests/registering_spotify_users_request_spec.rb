@@ -2,23 +2,36 @@ require "rails_helper"
 
 describe RegisteringSpotifyUsersController, type: :request do
   describe "GET #new" do
-    context "with a broadcaster_username specified"
-    it "creates a registering spotify user with the specified broadcaster" do
-      create :spotify_app
+    context "with a broadcaster_username specified" do
+      it "creates a registering spotify user with the specified broadcaster" do
+        create :spotify_app
 
-      expect {
-        get "/registering_spotify_users/new?broadcaster_username=broadcaster_username_1"
-      }.to change { RegisteringSpotifyUser.count }.from(0).to(1)
+        expect {
+          get "/registering_spotify_users/new?broadcaster_username=broadcaster_username_1"
+        }.to change { RegisteringSpotifyUser.count }.from(0).to(1)
 
-      expect(RegisteringSpotifyUser.last.broadcaster_username).to(
-        eq("broadcaster_username_1")
-      )
+        expect(RegisteringSpotifyUser.last.broadcaster_username).to(
+          eq("broadcaster_username_1")
+        )
 
-      get "/registering_spotify_users/new?broadcaster_username=broadcaster_username_2"
+        get "/registering_spotify_users/new?broadcaster_username=broadcaster_username_2"
 
-      expect(RegisteringSpotifyUser.last.broadcaster_username).to(
-        eq("broadcaster_username_2")
-      )
+        expect(RegisteringSpotifyUser.last.broadcaster_username).to(
+          eq("broadcaster_username_2")
+        )
+      end
+    end
+
+    context "making the request from the mobile app" do
+      it "creates a registering spotify user with their mobile flag = true" do
+        create :spotify_app
+
+        expect {
+          get "/registering_spotify_users/new?broadcaster_username=broadcaster_username_1&mobile=true"
+        }.to change { RegisteringSpotifyUser.count }.from(0).to(1)
+
+        expect(RegisteringSpotifyUser.last.mobile).to eq(true)
+      end
     end
 
     it "creates a registering spotify user with a random identifier" do

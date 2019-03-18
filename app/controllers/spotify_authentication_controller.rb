@@ -4,8 +4,8 @@ class SpotifyAuthenticationController < ApiController
   def index
     authenticate
     listen_along
+    redirect_to client
     registering_spotify_user.destroy
-    redirect_to listen_with_web_app
   end
 
   private
@@ -31,8 +31,16 @@ class SpotifyAuthenticationController < ApiController
     RegisteringSpotifyUser.find_by(identifier: identifier)
   end
 
-  def listen_with_web_app
-    "#{ENV["CLIENT_URL"]}?token=#{spotify_user.listen_along_token}"
+  def client
+    registering_spotify_user.mobile ? mobile_app : web_app
+  end
+
+  def web_app
+    "#{ENV["WEB_CLIENT_URL"]}?token=#{spotify_user.listen_along_token}"
+  end
+
+  def mobile_app
+    "#{ENV["MOBILE_CLIENT_URL"]}?token=#{spotify_user.listen_along_token}"
   end
 
   def code

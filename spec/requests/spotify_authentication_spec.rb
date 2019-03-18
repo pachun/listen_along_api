@@ -46,24 +46,50 @@ describe "Spotify authentication" do
       }.to change { RegisteringSpotifyUser.count }.from(1).to(0)
     end
 
-    it "redirects back to the client react app" do
-      registering_spotify_user = create :registering_spotify_user,
-        identifier: "abcde"
-      stub_get_access_token_request(
-        registering_spotify_user: registering_spotify_user,
-        authorization_code: "12345",
-        access_token: "access_token",
-        refresh_token: "refresh_token",
-      )
-      stub_spotify_username_request(
-        access_token: "access_token",
-        spotify_username: "nick",
-      )
-      stub_currently_playing_request(access_token: "access_token")
+    context "when a user is authenticating from the mobile app" do
+      it "redirects back to the client mobile app" do
+        registering_spotify_user = create :registering_spotify_user,
+          identifier: "abcde",
+          mobile: true
+        stub_get_access_token_request(
+          registering_spotify_user: registering_spotify_user,
+          authorization_code: "12345",
+          access_token: "access_token",
+          refresh_token: "refresh_token",
+        )
+        stub_spotify_username_request(
+          access_token: "access_token",
+          spotify_username: "nick",
+        )
+        stub_currently_playing_request(access_token: "access_token")
 
-      get "/spotify_authentication?state=abcde&code=12345"
+        get "/spotify_authentication?state=abcde&code=12345"
 
-      expect(response).to redirect_to("#{ENV["CLIENT_URL"]}?token=#{SpotifyUser.last.listen_along_token}")
+        expect(response).to redirect_to("#{ENV["MOBILE_CLIENT_URL"]}?token=#{SpotifyUser.last.listen_along_token}")
+      end
+    end
+
+    context "when a user is authenticating from the web app" do
+      it "redirects back to the client web app" do
+        registering_spotify_user = create :registering_spotify_user,
+          identifier: "abcde",
+          mobile: false
+        stub_get_access_token_request(
+          registering_spotify_user: registering_spotify_user,
+          authorization_code: "12345",
+          access_token: "access_token",
+          refresh_token: "refresh_token",
+        )
+        stub_spotify_username_request(
+          access_token: "access_token",
+          spotify_username: "nick",
+        )
+        stub_currently_playing_request(access_token: "access_token")
+
+        get "/spotify_authentication?state=abcde&code=12345"
+
+        expect(response).to redirect_to("#{ENV["WEB_CLIENT_URL"]}?token=#{SpotifyUser.last.listen_along_token}")
+      end
     end
 
     context "when the registering spotify user has a broadcaster" do
