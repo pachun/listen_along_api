@@ -12,7 +12,7 @@ ActiveAdmin.register SpotifyUser do
     :display_name,
     :avatar_url,
     :listen_along_token,
-    :spotify_app
+    :spotify_app_id
 
   index do
     actions
