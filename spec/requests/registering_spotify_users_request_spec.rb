@@ -88,13 +88,79 @@ describe RegisteringSpotifyUsersController, type: :request do
 
       get "/registering_spotify_users/new"
 
-      expect(response).to redirect_to("https://accounts.spotify.com/authorize?client_id=#{spotify_app.client_identifier}&response_type=code&redirect_uri=#{URI.encode(ENV["API_URL"])}/spotify_authentication&scope=user-read-currently-playing%20user-modify-playback-state%20user-read-playback-state&state=#{RegisteringSpotifyUser.last.identifier}")
+      expect(response).to redirect_to(ExpectedRedirectUrl.url(
+        spotify_app,
+        RegisteringSpotifyUser.all.last
+      ))
 
       spotify_app.update(client_identifier: "client_id_2")
 
       get "/registering_spotify_users/new"
 
-      expect(response).to redirect_to("https://accounts.spotify.com/authorize?client_id=#{spotify_app.client_identifier}&response_type=code&redirect_uri=#{URI.encode(ENV["API_URL"])}/spotify_authentication&scope=user-read-currently-playing%20user-modify-playback-state%20user-read-playback-state&state=#{RegisteringSpotifyUser.last.identifier}")
+      expect(response).to redirect_to(ExpectedRedirectUrl.url(
+        spotify_app,
+        RegisteringSpotifyUser.all.last,
+      ))
     end
+  end
+end
+
+module ExpectedRedirectUrl
+  def self.url(spotify_app, registering_spotify_user)
+    params(
+      spotify_app,
+      registering_spotify_user
+    ).each_with_index.inject(oauth_url) do |previous, iterator|
+
+      param, index = iterator
+      previous + (index == 0 ? "?" : "&") + param.join("=")
+    end
+  end
+
+  def self.oauth_url
+    "https://accounts.spotify.com/authorize"
+  end
+
+  def self.params(spotify_app, registering_spotify_user)
+    [
+      ["client_id", spotify_app.client_identifier],
+      ["response_type", "code"],
+      ["redirect_uri", redirect_uri],
+      ["scope", expected_scopes.join("%20")],
+      ["state", registering_spotify_user.identifier],
+    ]
+  end
+
+  def self.redirect_uri
+    "#{URI.encode(ENV["API_URL"])}/spotify_authentication"
+  end
+
+  def self.expected_scopes
+    [
+      "user-read-recently-played",
+      "user-top-read",
+
+      "user-library-modify",
+      "user-library-read",
+
+      "playlist-read-private",
+      "playlist-modify-public",
+      "playlist-modify-private",
+      "playlist-read-collaborative",
+
+      "user-read-email",
+      "user-read-birthdate",
+      "user-read-private",
+
+      "user-read-playback-state",
+      "user-modify-playback-state",
+      "user-read-currently-playing",
+
+      "app-remote-control",
+      "streaming",
+
+      "user-follow-read",
+      "user-follow-modify",
+    ]
   end
 end

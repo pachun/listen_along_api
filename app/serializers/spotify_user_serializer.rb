@@ -7,7 +7,8 @@ class SpotifyUserSerializer < ActiveModel::Serializer
     :avatar_url,
     :song_name,
     :song_artists,
-    :song_album_cover_url
+    :song_album_cover_url,
+    :song_uri
 
   has_one :broadcaster
 

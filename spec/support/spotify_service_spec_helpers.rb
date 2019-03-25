@@ -113,6 +113,16 @@ module SpotifyServiceSpecHelpers
     )
   end
 
+  def stub_add_song_to_library_request(access_token:, song_id:)
+    stub_request(
+      :put,
+      "https://api.spotify.com/v1/me/tracks?ids=#{song_id}")
+      .with(
+          headers: {
+        "Authorization"=>"Bearer #{access_token}",
+      }).to_return(status: 200, body: "", headers: {})
+  end
+
   def stub_spotify_username_request(args = {})
     if args[:avatar_url]
       @images = [ "url": args[:avatar_url] ]

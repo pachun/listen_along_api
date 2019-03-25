@@ -82,13 +82,53 @@ describe SpotifyUsersController do
     end
   end
 
-  describe "GET /listen_along" do
+  describe "PUT /add_song_to_my_library" do
+    it "adds the song to my library" do
+      token = "9999"
+      song_id = "song_id"
+      spotify_user = create :spotify_user,
+        listen_along_token: token
+
+      spotify_service_double = instance_double(SpotifyService)
+      allow(SpotifyService).to receive(:new)
+        .with(spotify_user)
+        .and_return(spotify_service_double)
+      allow(spotify_service_double).to receive(:add_to_library)
+
+      put "/add_to_library",
+        headers: { "Authorization": "Bearer #{token}"},
+        params: { song_id: song_id }
+
+      expect(spotify_service_double).to have_received(:add_to_library)
+        .with(song_id: song_id)
+    end
+
+    context "without a listen along token" do
+      it "doesn't add a song to anyones library and returns 401 unauthorized" do
+        song_id = "song_id"
+        spotify_user = create :spotify_user
+
+        spotify_service_double = instance_double(SpotifyService)
+        allow(SpotifyService).to receive(:new)
+          .with(spotify_user)
+          .and_return(spotify_service_double)
+        allow(spotify_service_double).to receive(:add_to_library)
+
+        put "/add_to_library",
+          params: { song_id: song_id }
+
+        expect(SpotifyService).not_to have_received(:new)
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+  end
+
+  describe "POST /listen_along" do
     it "syncs the listener's Spotify playback with the broadcaster's" do
       broadcaster = create :spotify_user,
         username: "broadcaster"
       listeners_token = "listeners_token"
       listener = create :spotify_user,
-        username: "listener",
         listen_along_token: listeners_token
 
       spotify_service_double = instance_double(SpotifyService)
@@ -97,7 +137,7 @@ describe SpotifyUsersController do
         .and_return(spotify_service_double)
       allow(spotify_service_double).to receive(:listen_along)
 
-      get "/listen_along",
+      post "/listen_along",
         headers: { "Authorization": "Bearer #{listeners_token}"},
         params: { broadcaster_username: broadcaster.username }
 
@@ -107,7 +147,7 @@ describe SpotifyUsersController do
       expect(response).to have_http_status(:no_content)
     end
 
-    context "the spotify user id does not match the spotify users token" do
+    context "without a listen along token" do
       it "does not sync the listener's Spotify playback with the broadcaster's" do
         broadcaster = create :spotify_user,
           username: "broadcaster"
@@ -121,10 +161,9 @@ describe SpotifyUsersController do
           .and_return(spotify_service_double)
         allow(spotify_service_double).to receive(:listen_along)
 
-        get "/listen_along",
+        post "/listen_along",
           params: {
             broadcaster_username: broadcaster.username,
-            token: listener.listen_along_token,
           }
 
         expect(spotify_service_double).not_to have_received(:listen_along).with(

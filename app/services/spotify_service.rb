@@ -6,21 +6,42 @@ class SpotifyService
   SPOTIFY_USERNAME_ENDPOINT = "/v1/me"
   SPOTIFY_AUTHORIZATION_URL = "https://accounts.spotify.com/api/token"
   REPEAT_ON_ENDPOINT = "/v1/me/player/repeat?state=track"
+  ADD_TO_LIBRARY_ENDPOINT = "/v1/me/tracks"
+  AUTHORIZATION_SCOPES = [
+    "user-read-recently-played",
+    "user-top-read",
+
+    "user-library-modify",
+    "user-library-read",
+
+    "playlist-read-private",
+    "playlist-modify-public",
+    "playlist-modify-private",
+    "playlist-read-collaborative",
+
+    "user-read-email",
+    "user-read-birthdate",
+    "user-read-private",
+
+    "user-read-playback-state",
+    "user-modify-playback-state",
+    "user-read-currently-playing",
+
+    "app-remote-control",
+    "streaming",
+
+    "user-follow-read",
+    "user-follow-modify",
+  ]
 
   def self.oauth_url(registering_spotify_user:)
-    scopes = [
-      "user-read-currently-playing",
-      "user-modify-playback-state",
-      "user-read-playback-state",
-    ]
-
     redirect_uri = "#{URI.encode(ENV["API_URL"])}/spotify_authentication"
 
     params = [
       ["client_id", registering_spotify_user.spotify_app.client_identifier],
       ["response_type", "code"],
       ["redirect_uri", redirect_uri],
-      ["scope", scopes.join("%20")],
+      ["scope", AUTHORIZATION_SCOPES.join("%20")],
       ["state", registering_spotify_user.identifier]
     ]
 
@@ -54,6 +75,15 @@ class SpotifyService
     refresh_token_and_listen_along(broadcaster: broadcaster)
     turn_on_repeat
     update_listener_state(broadcaster)
+  end
+
+  def add_to_library(song_id:)
+    url = SpotifyService::SPOTIFY_API_URL +
+      ADD_TO_LIBRARY_ENDPOINT +
+      "?ids=#{song_id}"
+    Faraday.put(url) do |request|
+      request.headers["Authorization"] = authenticated_header
+    end
   end
 
   private

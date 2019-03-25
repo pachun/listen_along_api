@@ -4,12 +4,18 @@ class SpotifyUsersController < ApiController
       spotify_user: current_spotify_user
   end
 
-  def update
-    if authenticated?
-      current_spotify_user.listen_to!(broadcaster)
-    else
-      head :unauthorized
-    end
+  def add_to_library
+    return (head :unauthorized) unless authenticated?
+
+    SpotifyService
+      .new(current_spotify_user)
+      .add_to_library(song_id: add_to_library_params[:song_id])
+  end
+
+  def listen_along
+    return (head :unauthorized) unless authenticated?
+
+    current_spotify_user.listen_to!(broadcaster)
   end
 
   private
@@ -24,7 +30,7 @@ class SpotifyUsersController < ApiController
 
   def broadcaster
     @broadcaster ||= SpotifyUser.find_by(
-      username: spotify_user_params[:broadcaster_username]
+      username: listen_along_params[:broadcaster_username]
     )
   end
 
@@ -36,7 +42,11 @@ class SpotifyUsersController < ApiController
     request.headers["Authorization"]&.split&.last
   end
 
-  def spotify_user_params
-    params.permit(:id, :broadcaster_username)
+  def listen_along_params
+    params.permit(:broadcaster_username)
+  end
+
+  def add_to_library_params
+    params.permit(:song_id)
   end
 end

@@ -1,6 +1,22 @@
 require "rails_helper"
 
 describe SpotifyService do
+  describe "#add_to_library(song_uri:)" do
+    it "adds the song to the spotify user's library" do
+      song_id = "15vzANxN8G9wWfwAJLLMCg"
+      spotify_user = create :spotify_user,
+        access_token: "token"
+      add_song_to_library_request = stub_add_song_to_library_request(
+        access_token: spotify_user.access_token,
+        song_id: song_id,
+      )
+
+      SpotifyService.new(spotify_user).add_to_library(song_id: song_id)
+
+      expect(add_song_to_library_request).to have_been_requested
+    end
+  end
+
   describe "self.authenticate(using_authorization_code:)" do
     context "the spotify user has authenticated using another device before" do
       it "does not reset their listen along token" do

@@ -13,6 +13,18 @@ describe SpotifyUserSerializer do
     expect(is_listening).to eq(true)
   end
 
+  it "serializes the uri of the song the user is listening to" do
+    spotify_user = create :spotify_user,
+      song_uri: "spotify:track:id"
+
+    serializer = SpotifyUserSerializer.new(spotify_user)
+    serialization = ActiveModelSerializers::Adapter.create(serializer).to_json
+
+    is_listening = JSON.parse(serialization)["song_uri"]
+
+    expect(is_listening).to eq("spotify:track:id")
+  end
+
   it "serializes user ids" do
     spotify_user = create :spotify_user
 
