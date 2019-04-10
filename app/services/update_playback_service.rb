@@ -12,11 +12,28 @@ class UpdatePlaybackService
     unsync_listeners_who_started_a_new_song
     resync_listeners_whose_broadcaster_started_a_new_song
     update_paused_listeners_playback
+    carry_listeners_to_new_broadcasters
 
     tell_clients_to_refresh_their_listener_list
   end
 
   private
+
+  def carry_listeners_to_new_broadcasters
+    broadcasters_who_started_listening_to_someone.each do |old_broadcaster|
+      move_listeners_to_new_broadcaster(old_broadcaster)
+    end
+  end
+
+  def broadcasters_who_started_listening_to_someone
+    SpotifyUser.joins(:listeners).where.not(broadcaster: nil)
+  end
+
+  def move_listeners_to_new_broadcaster(old_broadcaster)
+    old_broadcaster.listeners.update_all(
+      spotify_user_id: old_broadcaster.broadcaster.id
+    )
+  end
 
   def update_playback_states
     SpotifyUser.all.each do |spotify_user|

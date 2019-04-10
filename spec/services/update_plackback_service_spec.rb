@@ -2,6 +2,30 @@ require "rails_helper"
 
 describe UpdatePlaybackService do
   describe "self.update" do
+    context "a listener's broadcaster started listening to another broadcaster" do
+      it "updates the listener's broadcaster to the new broadcaster" do
+        original_broadcaster = create :spotify_user,
+          is_listening: true
+
+        listener = create :spotify_user,
+          broadcaster: original_broadcaster,
+          is_listening: true
+
+        new_broadcaster = create :spotify_user,
+          is_listening: true
+
+        original_broadcaster.update(broadcaster: new_broadcaster)
+
+        stub_get_playback_request(original_broadcaster)
+        stub_get_playback_request(new_broadcaster)
+        stub_get_playback_request(listener)
+
+        UpdatePlaybackService.update
+
+        expect(listener.reload.broadcaster).to eq(new_broadcaster)
+      end
+    end
+
     it "updates spotify user's playbacks" do
       spotify_user = create :spotify_user,
         is_listening: true
