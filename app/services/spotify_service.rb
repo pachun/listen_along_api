@@ -6,6 +6,7 @@ class SpotifyService
   SPOTIFY_USERNAME_ENDPOINT = "/v1/me"
   SPOTIFY_AUTHORIZATION_URL = "https://accounts.spotify.com/api/token"
   REPEAT_ON_ENDPOINT = "/v1/me/player/repeat?state=track"
+  REPEAT_OFF_ENDPOINT = "/v1/me/player/repeat?state=off"
   ADD_TO_LIBRARY_ENDPOINT = "/v1/me/tracks"
   AUTHORIZATION_SCOPES = [
     "user-read-recently-played",
@@ -84,6 +85,31 @@ class SpotifyService
     Faraday.put(url) do |request|
       request.headers["Authorization"] = authenticated_header
     end
+  end
+
+  def turn_off_repeat
+    url = SpotifyService::SPOTIFY_API_URL + REPEAT_OFF_ENDPOINT
+    spotify_response = Faraday.put(url) do |request|
+      request.headers["Authorization"] = authenticated_header
+    end
+    Rails.logger.info({
+      event: {
+        type: "turn_off_repeat",
+        spotify_username: spotify_user.username,
+        request: {
+          url: url,
+          method: "PUT",
+          headers: {
+            "Authorization" => authenticated_header,
+          },
+        },
+        response: {
+          status: spotify_response.status,
+          headers: spotify_response.headers,
+          body: spotify_response.body,
+        },
+      },
+    }.to_json)
   end
 
   private

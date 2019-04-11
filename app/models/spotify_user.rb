@@ -34,6 +34,7 @@ class SpotifyUser < ApplicationRecord
       maybe_intentionally_paused: false,
       broadcaster: nil,
     )
+    SpotifyService.new(self).turn_off_repeat
   end
 
   def listening?

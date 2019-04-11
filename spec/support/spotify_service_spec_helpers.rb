@@ -4,6 +4,14 @@ module SpotifyServiceSpecHelpers
     allow(SpotifyService).to receive(:new)
       .and_return(spotify_service_double)
     allow(spotify_service_double).to receive(:listen_along)
+    allow(spotify_service_double).to receive(:turn_off_repeat)
+  end
+
+  def stub_turn_off_repeat_request(spotify_user)
+    stub_request(:put, "https://api.spotify.com/v1/me/player/repeat?state=off")
+      .with(headers: {
+        "Authorization" => "Bearer #{spotify_user.access_token}"
+      }).to_return(status: 200, body: "", headers: {})
   end
 
   def stub_start_playback_loop_request(args = {})

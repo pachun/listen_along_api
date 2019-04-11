@@ -69,6 +69,26 @@ describe SpotifyUser do
   end
 
   describe "#stop_listening_along!" do
+    it "turns off repeat on the listeners devices" do
+      broadcaster = create :spotify_user
+      listener = create :spotify_user
+
+      spotify_service_double = instance_double(SpotifyService)
+      allow(spotify_service_double).to receive(:turn_off_repeat)
+      allow(SpotifyService).to receive(:new)
+        .with(listener)
+        .and_return(spotify_service_double)
+
+      allow(spotify_service_double).to receive(:listen_along)
+      listener.listen_to!(broadcaster)
+
+      listener.stop_listening_along!
+
+      expect(spotify_service_double).to have_received(:turn_off_repeat)
+
+      expect(2 + 2).to eq(4)
+    end
+
     it "stops listening along" do
       broadcaster = create :spotify_user,
         maybe_intentionally_paused: true
