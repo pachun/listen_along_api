@@ -1,16 +1,6 @@
 class SpotifyUser < ApplicationRecord
   DEFAULT_AVATAR_URL = "https://ubisoft-avatars.akamaized.net/454ea9c3-4b1a-4dbf-aa1b-0552fb994ce9/default_146_146.png"
 
-  has_many :broadcasting_histories,
-    class_name: "ListenAlongDetails",
-    foreign_key: :broadcaster_id,
-    dependent: :destroy
-
-  has_many :listening_histories,
-    class_name: "ListenAlongDetails",
-    foreign_key: :listener_id,
-    dependent: :destroy
-
   belongs_to :spotify_app
 
   has_many :listeners,
@@ -34,32 +24,12 @@ class SpotifyUser < ApplicationRecord
     update(SpotifyService.new(self).current_playback_state)
   end
 
-  def time_spent_listening_to(spotify_user)
-    ListenAlongDetails.find_by(
-      listener: self,
-      broadcaster: spotify_user,
-    ).duration
-  end
-
   def listen_to!(spotify_user)
     update(broadcaster: spotify_user)
     SpotifyService.new(self).listen_along(broadcaster: spotify_user)
-    ListenAlongDetails.find_or_create_by(
-      listener: self,
-      broadcaster: spotify_user,
-    ).update(
-      listen_along_start_time: Time.now,
-    )
   end
 
   def stop_listening_along!
-    details = listen_along_details
-
-    details.update(
-      duration: (
-        (Time.now - details.listen_along_start_time) \
-        + details.duration
-    ))
     update(
       maybe_intentionally_paused: false,
       broadcaster: nil,
@@ -105,14 +75,5 @@ class SpotifyUser < ApplicationRecord
   def started_playing_music_independently?
     !broadcaster.changed_song? &&
       !on_same_song_as_broadcaster?
-  end
-
-  private
-
-  def listen_along_details(spotify_user = broadcaster)
-    ListenAlongDetails.find_by(
-      listener: self,
-      broadcaster: spotify_user,
-    )
   end
 end

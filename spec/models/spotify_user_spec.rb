@@ -1,34 +1,6 @@
 require "rails_helper"
 
 describe SpotifyUser do
-  include ActiveSupport::Testing::TimeHelpers
-
-  describe ".destroy" do
-    it "destroys associated listening histories" do
-      listener = create :spotify_user
-      broadcaster = create :spotify_user
-      details = create :listen_along_details,
-        broadcaster: broadcaster,
-        listener: listener
-
-      listener.destroy
-
-      expect(ListenAlongDetails.where(id: details.id)).to be_empty
-    end
-
-    it "destroys associated broadcasting histories" do
-      listener = create :spotify_user
-      broadcaster = create :spotify_user
-      details = create :listen_along_details,
-        broadcaster: broadcaster,
-        listener: listener
-
-      broadcaster.destroy
-
-      expect(ListenAlongDetails.where(id: details.id)).to be_empty
-    end
-  end
-
   describe "#update_playback_state" do
     it "updates playback state" do
       spotify_user_1 = create :spotify_user
@@ -62,64 +34,6 @@ describe SpotifyUser do
       spotify_user_2.update_playback_state
 
       expect(spotify_user_2).to have_received(:update).with(expected_playback_state_2)
-    end
-  end
-
-  describe "#time_spent_listening_to(spotify_user)" do
-    it "records the duration of the listen along" do
-      stub_spotify_service_listen_alongs
-
-      listener_1 = create :spotify_user
-      broadcaster_1 = create :spotify_user
-      begin_listening_time = 10.minutes.from_now
-      stop_listening_time = begin_listening_time + 5.minutes
-
-      travel_to(begin_listening_time) do
-        listener_1.listen_to!(broadcaster_1)
-      end
-      travel_to(stop_listening_time) do
-        listener_1.stop_listening_along!
-      end
-
-      expect(listener_1.time_spent_listening_to(broadcaster_1)).to eq(300)
-
-      listener_2 = create :spotify_user
-      broadcaster_2 = create :spotify_user
-      begin_listening_time = 10.minutes.from_now
-      stop_listening_time = begin_listening_time + 10.minutes
-
-      travel_to(begin_listening_time) do
-        listener_2.listen_to!(broadcaster_2)
-      end
-      travel_to(stop_listening_time) do
-        listener_2.stop_listening_along!
-      end
-
-      expect(listener_2.time_spent_listening_to(broadcaster_2)).to eq(600)
-    end
-
-    context "the listener has listened to the same broadcaster before" do
-      it "records cumulative listen along durations" do
-        stub_spotify_service_listen_alongs
-
-        listener = create :spotify_user
-        broadcaster = create :spotify_user
-        begin_listening_time = 10.minutes.from_now
-        stop_listening_time = begin_listening_time + 5.minutes
-        create :listen_along_details,
-          listener: listener,
-          broadcaster: broadcaster,
-          duration: 300
-
-        travel_to(begin_listening_time) do
-          listener.listen_to!(broadcaster)
-        end
-        travel_to(stop_listening_time) do
-          listener.stop_listening_along!
-        end
-
-        expect(listener.time_spent_listening_to(broadcaster)).to eq(600)
-      end
     end
   end
 

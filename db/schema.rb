@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_03_18_235006) do
+ActiveRecord::Schema.define(version: 2019_04_12_085058) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -39,17 +39,6 @@ ActiveRecord::Schema.define(version: 2019_03_18_235006) do
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_admin_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
-  end
-
-  create_table "listen_along_details", force: :cascade do |t|
-    t.bigint "broadcaster_id"
-    t.bigint "listener_id"
-    t.integer "duration", default: 0
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "listen_along_start_time"
-    t.index ["broadcaster_id"], name: "index_listen_along_details_on_broadcaster_id"
-    t.index ["listener_id"], name: "index_listen_along_details_on_listener_id"
   end
 
   create_table "registering_spotify_users", force: :cascade do |t|
