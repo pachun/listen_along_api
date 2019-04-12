@@ -279,9 +279,8 @@ class SpotifyService
   end
 
   def spotify_access_token_expired?(spotify_response)
-    bad_request = 400
     unauthorized = 401
-    [bad_request, unauthorized].include?(spotify_response.status)
+    spotify_response.status == unauthorized
   end
 
   def authenticated_header

@@ -334,37 +334,6 @@ describe SpotifyService do
         end
       end
 
-      # this is a bandaide. see commit message
-      context "the spotify access token is nil" do
-        it "gets a new access token then returns the song name" do
-          refreshed_access_token = "refreshed access token"
-          spotify_user = create :spotify_user,
-            access_token: nil,
-            refresh_token: "refresh token"
-          stub_currently_playing_request(
-            access_token: nil,
-          )
-          stub_refresh_access_token_request(
-            spotify_app: spotify_user.spotify_app,
-            refresh_token: spotify_user.refresh_token,
-            refreshed_access_token: refreshed_access_token,
-          )
-          stub_currently_playing_request(
-            access_token: refreshed_access_token,
-            song_name: "Bone Dry",
-          )
-
-          playback_state = SpotifyService
-            .new(spotify_user)
-            .current_playback_state
-
-          expect(spotify_user.reload.access_token).to(
-            eq("refreshed access token")
-          )
-          expect(playback_state[:song_name]).to eq("Bone Dry")
-        end
-      end
-
       it "returns 'Bone Dry'" do
         stub_currently_playing_request(
           access_token: "access token",
