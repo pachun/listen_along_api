@@ -77,7 +77,13 @@ class PlaybackState
   def no_song_playing?
     @no_song_playing ||= \
       nothing_has_played_in_a_while? ||
-      nothing_is_playing_now?
+      nothing_is_playing_now? ||
+      is_listening_to_spotify_podcast
+  end
+
+  def is_listening_to_spotify_podcast
+    @is_listening_to_spotify_podcast ||= JSON
+      .parse(api_response.body)["currently_playing_type"] == "episode"
   end
 
   def nothing_has_played_in_a_while?

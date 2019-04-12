@@ -14,6 +14,16 @@ module SpotifyServiceSpecHelpers
       }).to_return(status: 200, body: "", headers: {})
   end
 
+  def stub_get_playback_request_with_spotify_podcast(spotify_user)
+    podcast_response_body = "{ \"timestamp\" : 1555068701246, \"context\" : null, \"progress_ms\" : 1830040, \"item\" : null, \"currently_playing_type\" : \"episode\", \"actions\" : { \"disallows\" : { \"resuming\" : true } }, \"is_playing\" : true }"
+
+    stub_request(
+      :get,
+      "https://api.spotify.com/v1/me/player/currently-playing"
+    ).with(headers: { 'Authorization'=>"Bearer #{spotify_user.access_token}" })
+    .to_return(status: 200, body: podcast_response_body, headers: {})
+  end
+
   def stub_start_playback_loop_request(args = {})
     access_token = args[:access_token] ? args[:access_token] : args[:spotify_user].access_token
     stub_request(

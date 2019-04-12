@@ -12,6 +12,18 @@ describe SpotifyUser do
   end
 
   describe "#update_playback_state" do
+    context "the user is listening to a spotify podcast" do
+      it "sets their playback state to 'not listening'" do
+        spotify_user = create :spotify_user
+
+        stub_get_playback_request_with_spotify_podcast(spotify_user)
+
+        spotify_user.update_playback_state
+
+        expect(spotify_user).not_to be_listening
+      end
+    end
+
     it "updates playback state" do
       spotify_user_1 = create :spotify_user
       allow(spotify_user_1).to receive(:update)
