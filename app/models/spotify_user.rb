@@ -22,6 +22,10 @@ class SpotifyUser < ApplicationRecord
       .order(:display_name)
   }
 
+  def updated_playback_state
+    SpotifyService.new(self).updatable_state
+  end
+
   def update_playback_state
     update(SpotifyService.new(self).current_playback_state)
   end

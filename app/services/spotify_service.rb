@@ -65,6 +65,13 @@ class SpotifyService
     @spotify_user = spotify_user
   end
 
+  def updatable_state
+    {
+      spotify_user_id: spotify_user.id,
+      playback_state: current_playback_state,
+    }
+  end
+
   def current_playback_state
     PlaybackState.from(
       api_response: song_request,
