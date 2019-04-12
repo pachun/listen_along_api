@@ -1,6 +1,16 @@
 require "rails_helper"
 
 describe SpotifyUser do
+  it "is invalid without an access token" do
+    spotify_user = build :spotify_user, access_token: nil
+
+    expect(spotify_user).not_to be_valid
+
+    spotify_user.access_token = ""
+
+    expect(spotify_user).not_to be_valid
+  end
+
   describe "#update_playback_state" do
     it "updates playback state" do
       spotify_user_1 = create :spotify_user
