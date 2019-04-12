@@ -305,7 +305,7 @@ class SpotifyService
 
     def authenticate
       if spotify_user.present?
-        update_spotify_tokens
+        update_existing_spotify_user
       else
         create_new_spotify_user
       end
@@ -327,8 +327,9 @@ class SpotifyService
       )
     end
 
-    def update_spotify_tokens
+    def update_existing_spotify_user
       spotify_user.update(
+        spotify_app: registering_spotify_user.spotify_app,
         access_token: access_token,
         refresh_token: refresh_token,
       )

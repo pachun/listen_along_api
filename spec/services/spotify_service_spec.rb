@@ -19,6 +19,44 @@ describe SpotifyService do
 
   describe "self.authenticate(using_authorization_code:)" do
     context "the spotify user has authenticated using another device before" do
+      it "updates their spotify_app if a new spotify_app was chosen for them" do
+        spotify_app_1 = create :spotify_app,
+          client_identifier: "client_id_1",
+          client_secret: "client_secret_1"
+
+        spotify_app_2 = create :spotify_app,
+          client_identifier: "client_id_2",
+          client_secret: "client_secret_2"
+
+        registering_spotify_user = create :registering_spotify_user,
+          spotify_app: spotify_app_1
+
+        original_token = "original_token"
+
+        spotify_user = create :spotify_user,
+          username: "spotify_guy",
+          listen_along_token: original_token,
+          spotify_app: spotify_app_2
+
+        stub_get_access_token_request(
+          registering_spotify_user: registering_spotify_user,
+          authorization_code: "auth_code",
+          access_token: "t1"
+        )
+
+        stub_spotify_username_request(
+          access_token: "t1",
+          spotify_username: "spotify_guy",
+        )
+
+        SpotifyService.authenticate(
+          registering_spotify_user: registering_spotify_user,
+          using_authorization_code: "auth_code",
+        )
+
+        expect(spotify_user.reload.spotify_app).to eq(spotify_app_1)
+      end
+
       it "does not reset their listen along token" do
         registering_spotify_user = create :registering_spotify_user
 
