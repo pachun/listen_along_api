@@ -18,6 +18,14 @@ describe UpdatePlaybackService do
       expect(UnsyncListenersWhoseBroadcasterStoppedBroadcasting).to have_received(:unsync)
     end
 
+    it "resyncs listeners whose listener/broadcaster playback discrepancy > 3 seconds" do
+      allow(ResyncOutOfSyncListeners).to receive(:resync)
+
+      UpdatePlaybackService.update
+
+      expect(ResyncOutOfSyncListeners).to have_received(:resync)
+    end
+
     it "unsyncs listeners who started a new song" do
       allow(UnsyncListenersWhoStartedANewSong).to receive(:unsync)
 
