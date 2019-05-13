@@ -20,6 +20,7 @@ gem "timber"
 
 group :development, :test do
   gem "byebug", platforms: [:mri, :mingw, :x64_mingw]
+  gem "bullet"
   gem "dotenv-rails"
   gem "factory_bot_rails", "~> 4.0"
   gem "rspec-rails", "~> 3.7"
