@@ -48,9 +48,12 @@ describe "Spotify authentication" do
 
     context "when a user is authenticating from the mobile app" do
       it "redirects back to the client mobile app" do
+        broadcaster = create :spotify_user,
+          username: "broadcaster_username"
         registering_spotify_user = create :registering_spotify_user,
           identifier: "abcde",
-          mobile: true
+          mobile: true,
+          broadcaster_username: broadcaster.username
         stub_get_access_token_request(
           registering_spotify_user: registering_spotify_user,
           authorization_code: "12345",
@@ -62,10 +65,18 @@ describe "Spotify authentication" do
           spotify_username: "nick",
         )
         stub_currently_playing_request(access_token: "access_token")
+        stub_currently_playing_request(access_token: broadcaster.access_token)
+        stub_spotify_service_listen_alongs
 
         get "/spotify_authentication?state=abcde&code=12345"
 
-        expect(response).to redirect_to("#{ENV["MOBILE_CLIENT_URL"]}?token=#{SpotifyUser.last.listen_along_token}")
+        expect(response).to redirect_to("#{
+            ENV["MOBILE_CLIENT_URL"]
+          }?token=#{
+            SpotifyUser.last.listen_along_token
+          }&broadcaster_username=#{
+            broadcaster.username
+        }")
       end
     end
 

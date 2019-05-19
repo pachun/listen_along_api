@@ -40,7 +40,7 @@ class SpotifyAuthenticationController < ApiController
   end
 
   def mobile_app
-    "#{ENV["MOBILE_CLIENT_URL"]}?token=#{spotify_user.listen_along_token}"
+    "#{ENV["MOBILE_CLIENT_URL"]}?token=#{spotify_user.listen_along_token}&broadcaster_username=#{broadcaster.username}"
   end
 
   def code
