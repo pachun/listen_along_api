@@ -101,6 +101,18 @@ class SpotifyService
     end
   end
 
+  def updated_avatar_state
+    url = SPOTIFY_API_URL + SPOTIFY_USERNAME_ENDPOINT
+    spotify_response = Faraday.get(url) do |req|
+      req.headers["Authorization"] = "Bearer #{spotify_user.access_token}"
+    end
+
+    {
+      spotify_user_id: spotify_user.id,
+      avatar_url: JSON.parse(spotify_response.body)["images"]&.first&.dig("url"),
+    }
+  end
+
   private
 
   def refresh_token_and_listen_along(broadcaster:)
