@@ -5,6 +5,6 @@ RSpec.describe SpotifyUsersChannel, type: :channel do
     subscribe
 
     expect(subscription).to be_confirmed
-    expect(streams).to eq(["spotify_users_channel"])
+    expect(subscription.streams).to eq(["spotify_users_channel"])
   end
 end
