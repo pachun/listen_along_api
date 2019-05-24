@@ -75,4 +75,5 @@ RSpec.configure do |config|
   # config.filter_gems_from_backtrace("gem name")
 
   config.include SpotifyServiceSpecHelpers
+  config.include RequestSpecHelpers, type: :request
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_04_12_085058) do
+ActiveRecord::Schema.define(version: 2019_05_24_215646) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -39,6 +39,22 @@ ActiveRecord::Schema.define(version: 2019_04_12_085058) do
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_admin_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
+  end
+
+  create_table "devices", force: :cascade do |t|
+    t.bigint "spotify_user_id"
+    t.string "expo_token"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["spotify_user_id"], name: "index_devices_on_spotify_user_id"
+  end
+
+  create_table "feedbacks", force: :cascade do |t|
+    t.bigint "spotify_user_id"
+    t.string "feedback"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["spotify_user_id"], name: "index_feedbacks_on_spotify_user_id"
   end
 
   create_table "registering_spotify_users", force: :cascade do |t|
@@ -82,6 +98,8 @@ ActiveRecord::Schema.define(version: 2019_04_12_085058) do
     t.index ["spotify_user_id"], name: "index_spotify_users_on_spotify_user_id"
   end
 
+  add_foreign_key "devices", "spotify_users"
+  add_foreign_key "feedbacks", "spotify_users"
   add_foreign_key "registering_spotify_users", "spotify_apps"
   add_foreign_key "spotify_users", "spotify_apps"
   add_foreign_key "spotify_users", "spotify_users"
