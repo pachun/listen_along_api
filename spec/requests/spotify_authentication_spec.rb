@@ -135,5 +135,38 @@ describe "Spotify authentication" do
         expect(listen_along_request).to have_been_requested
       end
     end
+
+    context "when the registering spotify user tried to listen along with themself" do
+      it "does not start listening along with the 'broadcaster' (themself)" do
+        allow(SpotifyService).to receive(:authenticate).and_call_original
+        broadcaster = create :spotify_user,
+          is_listening: true,
+          username: "SELF"
+        registering_spotify_user = create :registering_spotify_user,
+          identifier: "abcde",
+          broadcaster_username: "SELF"
+        stub_get_access_token_request(
+          registering_spotify_user: registering_spotify_user,
+          authorization_code: "12345",
+          access_token: "access_token",
+          refresh_token: "refresh_token",
+        )
+        stub_spotify_username_request(
+          access_token: "access_token",
+          spotify_username: "SELF",
+        )
+        stub_currently_playing_request(access_token: "access_token")
+        stub_get_playback_request(broadcaster)
+
+        stub_start_playback_loop_request(access_token: "access_token")
+
+        listen_along_request = stub_request(:put, "https://api.spotify.com/v1/me/player/play")
+          .with(headers: { 'Authorization'=>'Bearer access_token' })
+
+        get "/spotify_authentication?state=abcde&code=12345"
+
+        expect(listen_along_request).not_to have_been_requested
+      end
+    end
   end
 end

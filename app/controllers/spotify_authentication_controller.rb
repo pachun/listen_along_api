@@ -18,17 +18,22 @@ class SpotifyAuthenticationController < ApiController
   end
 
   def listen_along
-    spotify_user.listen_to!(broadcaster) if broadcaster.present?
+    spotify_user.listen_to!(broadcaster) if should_listen_along?
+  end
+
+  def should_listen_along?
+    broadcaster.present? && broadcaster.id != spotify_user.id
   end
 
   def broadcaster
-    SpotifyUser.find_by(
+    @broadcaster ||= SpotifyUser.find_by(
       username: registering_spotify_user.broadcaster_username
     )
   end
 
   def registering_spotify_user
-    RegisteringSpotifyUser.find_by(identifier: identifier)
+    @registering_spotify_user ||= RegisteringSpotifyUser
+      .find_by(identifier: identifier)
   end
 
   def client
