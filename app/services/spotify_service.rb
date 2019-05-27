@@ -244,6 +244,7 @@ class SpotifyService
         refresh_token: refresh_token,
         listen_along_token: new_token,
         avatar_url: avatar_url,
+        email: email,
       )
     end
 
@@ -275,14 +276,23 @@ class SpotifyService
       @display_name ||= username_request["display_name"]
     end
 
+    def email
+      @email ||= username_request["email"]
+    end
+
     def avatar_url
       return @avatar_url if @avatar_url.present?
 
       if username_request["images"].length == 0
-        @avatar_url = SpotifyUser::DEFAULT_AVATAR_URL
+        @avatar_url = gravatar_for_email(email)
       else
         @avatar_url = username_request["images"]&.first&.dig("url")
       end
+    end
+
+    def gravatar_for_email(email)
+      hash = Digest::MD5.hexdigest(email.strip.downcase)
+      "https://www.gravatar.com/avatar/#{hash}?d=robohash&size=400"
     end
 
     def username_request

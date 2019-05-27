@@ -153,6 +153,30 @@ describe SpotifyService do
       )
     end
 
+    it "saves the spotify user's email address" do
+      registering_spotify_user = create :registering_spotify_user
+      spotify_authentication_token_request = stub_get_access_token_request(
+        registering_spotify_user: registering_spotify_user,
+        authorization_code: "auth_code",
+        access_token: "access token",
+        refresh_token: "refresh token",
+      )
+      spotify_username_request = stub_spotify_username_request(
+        access_token: "access token",
+        spotify_username: "121613941",
+        email: "a@b.c",
+      )
+
+      SpotifyService.authenticate(
+        registering_spotify_user: registering_spotify_user,
+        using_authorization_code: "auth_code",
+      )
+
+      expect(spotify_username_request).to have_been_requested
+      expect(spotify_authentication_token_request).to have_been_requested
+      expect(SpotifyUser.last.email).to eq("a@b.c")
+    end
+
     it "saves the spotify user's avatar url" do
       registering_spotify_user = create :registering_spotify_user
       spotify_authentication_token_request = stub_get_access_token_request(
@@ -178,7 +202,7 @@ describe SpotifyService do
     end
 
     context "the spotify user has no avatar" do
-      it "saves a default avatar url" do
+      it "users a gravatar based on their email address" do
         registering_spotify_user = create :registering_spotify_user
         spotify_authentication_token_request = stub_get_access_token_request(
           registering_spotify_user: registering_spotify_user,
@@ -189,6 +213,7 @@ describe SpotifyService do
         spotify_username_request = stub_spotify_username_request(
           access_token: "access token",
           spotify_username: "121613941",
+          email: " Nick@pachulski.me  ",
         )
 
         SpotifyService.authenticate(
@@ -196,11 +221,12 @@ describe SpotifyService do
           using_authorization_code: "auth_code",
         )
 
+        expected_avatar_url = \
+          "https://www.gravatar.com/avatar/8ff7ad98849179025c718cf54a4c0f39?d=robohash&size=400"
+
         expect(spotify_username_request).to have_been_requested
         expect(spotify_authentication_token_request).to have_been_requested
-        expect(SpotifyUser.last.avatar_url).to(
-          eq(SpotifyUser::DEFAULT_AVATAR_URL)
-        )
+        expect(SpotifyUser.last.avatar_url).to eq(expected_avatar_url)
       end
     end
 

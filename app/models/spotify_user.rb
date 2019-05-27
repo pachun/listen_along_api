@@ -1,6 +1,4 @@
 class SpotifyUser < ApplicationRecord
-  DEFAULT_AVATAR_URL = "https://ubisoft-avatars.akamaized.net/454ea9c3-4b1a-4dbf-aa1b-0552fb994ce9/default_146_146.png"
-
   validates :access_token, presence: true
 
   belongs_to :spotify_app
