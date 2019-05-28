@@ -157,7 +157,7 @@ module SpotifyServiceSpecHelpers
         "id": args[:spotify_username],
         "display_name": args[:full_name],
         "images": @images,
-        "email": args[:email] || "email@address.com",
+        "email": args[:email],
       }.to_json,
     )
   end

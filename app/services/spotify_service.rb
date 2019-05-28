@@ -283,15 +283,21 @@ class SpotifyService
     def avatar_url
       return @avatar_url if @avatar_url.present?
 
-      if username_request["images"].length == 0
-        @avatar_url = gravatar_for_email(email)
+      if no_spotify_profile_image_set? && email.present?
+        @avatar_url = gravatar_from(email)
+      elsif no_spotify_profile_image_set? && !email.present?
+        @avatar_url = gravatar_from(spotify_username)
       else
         @avatar_url = username_request["images"]&.first&.dig("url")
       end
     end
 
-    def gravatar_for_email(email)
-      hash = Digest::MD5.hexdigest(email.strip.downcase)
+    def no_spotify_profile_image_set?
+      username_request["images"].length == 0
+    end
+
+    def gravatar_from(key)
+      hash = Digest::MD5.hexdigest(key.strip.downcase)
       "https://www.gravatar.com/avatar/#{hash}?d=robohash&size=400"
     end
 
