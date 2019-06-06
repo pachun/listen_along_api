@@ -1,12 +1,13 @@
 require "rufus-scheduler"
 
 EVERY_DAY_AT_MIDNIGHT = "0 0 * * *"
-FIVE_SECONDS = "5s"
+
+SEVEN_SECONDS = "7s"
 
 scheduler = Rufus::Scheduler.singleton
 
-scheduler.every FIVE_SECONDS do
-  run { UpdatePlaybackService.update }
+scheduler.every SEVEN_SECONDS do
+  run { UpdatePlaybackWorker.new.perform }
 end
 
 scheduler.cron EVERY_DAY_AT_MIDNIGHT do

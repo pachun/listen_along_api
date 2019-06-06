@@ -21,7 +21,7 @@ class SpotifyUser < ApplicationRecord
   }
 
   def updated_playback_state
-    SpotifyService.new(self).updatable_state
+    ::SpotifyService.new(self).updatable_state
   end
 
   def update_playback_state

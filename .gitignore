@@ -31,3 +31,6 @@ coverage
 
 # production database dumps
 latest.dump
+
+# redis logs
+dump.rdb

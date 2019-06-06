@@ -4,7 +4,6 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby "2.6.3"
 
 gem 'active_model_serializers', '~> 0.10.0'
-gem "action-cable-testing"
 gem "activeadmin"
 gem "addressable"
 gem "bootsnap", ">= 1.1.0", require: false
@@ -16,6 +15,7 @@ gem "rack-cors", :require => "rack/cors"
 gem "rails", "~> 5.2.3"
 gem "redis"
 gem "rufus-scheduler"
+gem "sidekiq"
 gem "timber"
 
 group :development, :test do
@@ -28,6 +28,7 @@ group :development, :test do
 end
 
 group :test do
+  gem "action-cable-testing"
   gem "simplecov", require: false
 end
 

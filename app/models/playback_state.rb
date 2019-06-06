@@ -3,6 +3,16 @@ class PlaybackState
     new(api_response, spotify_user).playback_state
   end
 
+  def self.not_listening_state
+    {
+      is_listening: false,
+      song_name: nil,
+      song_uri: nil,
+      millisecond_progress_into_song: nil,
+      broadcaster: nil,
+    }
+  end
+
   attr_reader :api_response, :spotify_user
 
   def initialize(api_response, spotify_user)
@@ -70,8 +80,17 @@ class PlaybackState
   end
 
   def album_cover_url
-    @album_cover_url ||= JSON
-      .parse(api_response.body)["item"]["album"]["images"][0]["url"]
+    if has_album_cover?
+      @album_cover_url ||= JSON
+        .parse(api_response.body)["item"]["album"]["images"][0]["url"]
+    else
+      @album_cover_url ||= ""
+    end
+  end
+
+  def has_album_cover?
+    @has_album_cover ||= JSON
+      .parse(api_response.body)["item"]["album"]["images"][0].present?
   end
 
   def no_song_playing?

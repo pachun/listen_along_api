@@ -34,6 +34,15 @@ module SpotifyServiceSpecHelpers
     )
   end
 
+  def stub_get_playback_request_with_rate_limiting(spotify_user)
+    stub_request(
+      :get,
+      "https://api.spotify.com/v1/me/player/currently-playing"
+    ).with(
+      headers: { "Authorization": "Bearer #{spotify_user.access_token}" },
+    ).to_return({ status: 429 }) #hi
+  end
+
   def stub_get_playback_request(spotify_user, overwrites = {})
     stub_request(
       :get,
@@ -199,6 +208,8 @@ end
 
 def get_playback_response(spotify_user, overwrites)
   artists = overwrites[:song_artists]&.map { |artist| { name: artist } }
+
+  images = overwrites[:album_url] ? [{ url: overwrites[:album_url] }] : []
   artists ||= [{name: nil}]
   {
     status: 200,
@@ -209,9 +220,7 @@ def get_playback_response(spotify_user, overwrites)
         name: overwrites[:song_name] || spotify_user.song_name,
         uri: overwrites[:song_uri] || spotify_user.song_uri,
         album: {
-          images: [{
-            url: overwrites[:album_url],
-          }],
+          images: images,
         },
         artists: artists,
       }

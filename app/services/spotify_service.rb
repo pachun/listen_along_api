@@ -10,7 +10,7 @@ class SpotifyService
   ADD_TO_LIBRARY_ENDPOINT = "/v1/me/tracks"
   AUTHORIZATION_SCOPES = [
     "user-read-recently-played",
-    "user-top-read",
+    # "user-top-read", # https://github.com/spotify/web-api/issues/1262
 
     "user-library-modify",
     "user-library-read",
@@ -73,10 +73,17 @@ class SpotifyService
   end
 
   def current_playback_state
-    PlaybackState.from(
-      api_response: song_request,
-      spotify_user: spotify_user,
-    )
+    request = song_request
+
+    if hit_spotify_api_rate_limit?(request)
+      Rails.logger.debug("(#{spotify_user.spotify_app.name}) maxed on #{spotify_user.username}")
+      PlaybackState.not_listening_state
+    else
+      PlaybackState.from(
+        api_response: request,
+        spotify_user: spotify_user,
+      )
+    end
   end
 
   def listen_along(broadcaster:)
@@ -115,6 +122,10 @@ class SpotifyService
 
   private
 
+  def hit_spotify_api_rate_limit?(request)
+    request.status == 429
+  end
+
   def refresh_token_and_listen_along(broadcaster:)
     playback_state = SpotifyService.new(broadcaster).current_playback_state
     if spotify_access_token_expired?(listen_along_request(playback_state))
@@ -145,10 +156,10 @@ class SpotifyService
 
     if spotify_access_token_expired?(request)
       refresh_access_token
-      currently_playing_song_request
-    else
-      request
+      request = currently_playing_song_request
     end
+
+    request
   end
 
   def listen_along_request(playback_state)
