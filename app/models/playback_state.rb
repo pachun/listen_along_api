@@ -21,6 +21,7 @@ class PlaybackState
   end
 
   def playback_state
+    return ::PlaybackState.not_listening_state if api_response.status == 400
     {
       is_listening: is_listening?,
       song_name: song_name,
