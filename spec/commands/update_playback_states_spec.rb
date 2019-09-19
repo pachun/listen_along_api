@@ -73,7 +73,7 @@ describe UpdatePlaybackStates do
     end
 
     context "the spotify api rate limit is hit while updating a user" do
-      it "updates the user to be not listening" do
+      it "does not make any changes to the spotify user" do
         old_broadcaster = create :spotify_user
 
         spotify_user = create :spotify_user,
@@ -86,18 +86,13 @@ describe UpdatePlaybackStates do
         stub_get_playback_request(old_broadcaster)
         stub_get_playback_request_with_rate_limiting(spotify_user)
 
+        old_attributes = spotify_user.attributes
+
         UpdatePlaybackStates.update
 
-        spotify_user.reload
+        new_attributes = spotify_user.reload.attributes
 
-        expect(spotify_user.attributes).to include({
-          "is_listening" => false,
-          "song_name" => nil,
-          "song_uri" => nil,
-          "millisecond_progress_into_song" => nil,
-        })
-
-        expect(spotify_user.broadcaster).to be_nil
+        expect(old_attributes).to eq(new_attributes)
       end
     end
   end
