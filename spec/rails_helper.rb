@@ -3,6 +3,7 @@ if ENV["COVERAGE"]
   SimpleCov.minimum_coverage(100)
   SimpleCov.start("rails") do
     add_filter("app/admin")
+    add_filter("lib/tasks")
   end
 end
 
