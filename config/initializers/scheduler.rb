@@ -7,7 +7,7 @@ SEVEN_SECONDS = "7s"
 scheduler = Rufus::Scheduler.singleton
 
 scheduler.every SEVEN_SECONDS do
-  run { UpdatePlaybackWorker.new.perform }
+  run { UpdatePlaybackWorker.perform_async }
 end
 
 scheduler.cron EVERY_DAY_AT_MIDNIGHT do
