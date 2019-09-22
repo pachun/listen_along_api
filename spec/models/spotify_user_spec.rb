@@ -80,13 +80,15 @@ describe SpotifyUser do
       stub_spotify_service_listen_alongs
 
       listener = create :spotify_user
-      broadcaster = create :spotify_user
+      broadcaster = create :spotify_user,
+        song_uri: "song_uri"
 
       listener.listen_to!(broadcaster)
 
       listener.reload
 
       expect(listener.broadcaster).to eq(broadcaster)
+      expect(listener.song_uri).to eq(broadcaster.song_uri)
     end
   end
 

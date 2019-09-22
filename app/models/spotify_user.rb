@@ -29,7 +29,10 @@ class SpotifyUser < ApplicationRecord
   end
 
   def listen_to!(spotify_user)
-    update(broadcaster: spotify_user)
+    update(
+      broadcaster: spotify_user,
+      song_uri: spotify_user.song_uri,
+    )
     SpotifyService.new(self).listen_along(broadcaster: spotify_user)
   end
 
