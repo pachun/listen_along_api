@@ -94,6 +94,42 @@ describe UpdatePlaybackStates do
 
         expect(old_attributes).to eq(new_attributes)
       end
+
+      it "creates a SpotifyApiRateLimitHit model" do
+        old_broadcaster = create :spotify_user
+
+        spotify_app = create :spotify_app
+        spotify_user = create :spotify_user,
+          is_listening: true,
+          song_name: "Beam Me Up",
+          song_uri: "spotify:track:1S4FHBl24uLTzJ37VMBjut",
+          millisecond_progress_into_song: "10000",
+          broadcaster: old_broadcaster,
+          spotify_app: spotify_app
+
+        stub_get_playback_request(old_broadcaster)
+        stub_get_playback_request_with_rate_limiting(spotify_user)
+
+        old_attributes = spotify_user.attributes
+
+        time = DateTime.current
+
+        num_prior_spotify_api_rate_limit_hits = SpotifyApiRateLimitHit.count
+
+        travel_to(time) do
+          UpdatePlaybackStates.update
+        end
+
+        expect(SpotifyApiRateLimitHit.count).to(
+          eq(num_prior_spotify_api_rate_limit_hits + 1)
+        )
+
+        expect(SpotifyApiRateLimitHit.last).to(have_attributes(
+          spotify_user: spotify_user,
+          spotify_app: spotify_app,
+          created_at: time.change(:usec => 0),
+        ))
+      end
     end
   end
 

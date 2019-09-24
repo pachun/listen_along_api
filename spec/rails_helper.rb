@@ -41,6 +41,7 @@ rescue ActiveRecord::PendingMigrationError => e
   exit 1
 end
 RSpec.configure do |config|
+  config.include ActiveSupport::Testing::TimeHelpers
 
   if Bullet.enable?
     config.before(:each) { Bullet.start_request }

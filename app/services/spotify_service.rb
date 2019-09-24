@@ -76,13 +76,10 @@ class SpotifyService
     request = song_request
 
     if hit_spotify_api_rate_limit?(request)
-      Rails.logger.debug("(#{spotify_user.spotify_app.name}) maxed on #{spotify_user.username}")
+      log_spotify_api_rate_limit_hit(spotify_user)
       {}
     else
-      PlaybackState.from(
-        api_response: request,
-        spotify_user: spotify_user,
-      )
+      PlaybackState.from(api_response: request, spotify_user: spotify_user)
     end
   end
 
@@ -121,6 +118,13 @@ class SpotifyService
   end
 
   private
+
+  def log_spotify_api_rate_limit_hit(spotify_user)
+    SpotifyApiRateLimitHit.create(
+      spotify_user: spotify_user,
+      spotify_app: spotify_user.spotify_app,
+    )
+  end
 
   def hit_spotify_api_rate_limit?(request)
     request.status == 429
