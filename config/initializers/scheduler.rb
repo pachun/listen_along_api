@@ -7,7 +7,13 @@ SEVEN_SECONDS = "7s"
 scheduler = Rufus::Scheduler.singleton
 
 scheduler.every SEVEN_SECONDS do
-  run { UpdatePlaybackWorker.perform_async }
+  run do
+    if Rails.env.production?
+      UpdatePlaybackWorker.perform_async
+    else
+      UpdatePlaybackWorker.new.perform
+    end
+  end
 end
 
 scheduler.cron EVERY_DAY_AT_MIDNIGHT do
