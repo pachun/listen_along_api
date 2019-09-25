@@ -22,6 +22,18 @@ The coverage report may be opened with:
 open coverage/index.html
 ```
 
+To validate that no known vulnerabilities exist in any dependencies:
+
+```bash
+bundle audit
+```
+
+To test, generate a coverage report, and validate that no known vulnerabilities exist in any dependencies (do this before committing to master):
+
+```bash
+bundle audit && DISABLE_SPRING=true COVERAGE=true bundle exec rspec
+```
+
 # Run
 
 ```bash
