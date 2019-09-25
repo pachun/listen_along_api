@@ -32,11 +32,6 @@ class SpotifyApp < ApplicationRecord
       batches << flat_order[offset, batch_size]
     end
 
-    # batch_zones = batches.map do |batch|
-    #   batch.map { |spotify_user| spotify_user.spotify_app.id }
-    # end
-    # pp batch_zones
-
     batches
   end
 end
