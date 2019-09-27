@@ -2,6 +2,13 @@
 
 Listen along to music with your friends through Spotify.
 
+# Install
+
+```bash
+bundle
+rails db:create && db:migrate
+```
+
 # Test
 
 To test without generating a coverage report:
