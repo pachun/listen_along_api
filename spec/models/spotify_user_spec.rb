@@ -90,6 +90,23 @@ describe SpotifyUser do
       expect(listener.broadcaster).to eq(broadcaster)
       expect(listener.song_uri).to eq(broadcaster.song_uri)
     end
+
+    it "updates the user's .last_listen_along date & time" do
+      stub_spotify_service_listen_alongs
+
+      listener = create :spotify_user
+      broadcaster = create :spotify_user,
+        song_uri: "song_uri"
+
+      listen_along_time = DateTime.current
+      travel_to listen_along_time do
+        listener.listen_to!(broadcaster)
+      end
+
+      listener.reload
+
+      expect(listener.last_listen_along_at.to_i).to eq(listen_along_time.to_i)
+    end
   end
 
   describe "#stop_listening_along!" do

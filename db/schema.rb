@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_09_25_202829) do
+ActiveRecord::Schema.define(version: 2019_11_29_062351) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -88,6 +88,7 @@ ActiveRecord::Schema.define(version: 2019_09_25_202829) do
     t.boolean "maybe_intentionally_paused", default: false, null: false
     t.bigint "spotify_app_id"
     t.string "email"
+    t.datetime "last_listen_along_at"
     t.index ["spotify_app_id"], name: "index_spotify_users_on_spotify_app_id"
     t.index ["spotify_user_id"], name: "index_spotify_users_on_spotify_user_id"
   end
