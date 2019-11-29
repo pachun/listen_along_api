@@ -2,6 +2,8 @@
 
 Listen along to music with your friends through Spotify.
 
+[Listen Along](http://listenalong.club/)
+
 # Install
 
 ```bash
