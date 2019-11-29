@@ -107,6 +107,20 @@ describe SpotifyUser do
 
       expect(listener.last_listen_along_at.to_i).to eq(listen_along_time.to_i)
     end
+
+    it "sets the user's is_listening status to true so that they're routinely updated" do
+      stub_spotify_service_listen_alongs
+
+      listener = create :spotify_user
+      broadcaster = create :spotify_user,
+        song_uri: "song_uri"
+
+      listener.listen_to!(broadcaster)
+
+      listener.reload
+
+      expect(listener.is_listening).to eq(true)
+    end
   end
 
   describe "#stop_listening_along!" do

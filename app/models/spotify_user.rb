@@ -33,6 +33,7 @@ class SpotifyUser < ApplicationRecord
       broadcaster: spotify_user,
       song_uri: spotify_user.song_uri,
       last_listen_along_at: DateTime.current,
+      is_listening: true,
     )
     SpotifyService.new(self).listen_along(broadcaster: spotify_user)
   end
