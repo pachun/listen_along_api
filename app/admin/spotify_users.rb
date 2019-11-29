@@ -15,18 +15,13 @@ ActiveAdmin.register SpotifyUser do
     :spotify_app_id
 
   index do
-    actions
     id_column
-    column :has_access_token do |spotify_user|
-      spotify_user.access_token != nil
-    end
-    column :display_name
+    column :username
+    column :is_listening
     column :broadcaster
     column :song_name
-    column :millisecond_progress_into_song
-    column :is_listening
-    column :username
-    column :spotify_app
+    column :last_listen_along_at
+    actions
   end
 
   form do |f|
