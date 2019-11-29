@@ -27,6 +27,10 @@ class UpdatePlaybackStates
       .each do |updatable_spotify_user_batch|
 
       get_updated_batch_playback_states(updatable_spotify_user_batch)
+
+      if Rails.env.production? && listening == false
+        sleep(2)
+      end
     end
   end
 

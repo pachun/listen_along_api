@@ -20,6 +20,25 @@ describe UpdatePlaybackStates do
         expect(spotify_user.song_artists).to eq(["a1", "a2"])
         expect(spotify_user.song_album_cover_url).to eq("album_cover_url")
       end
+
+      it "sleeps in between batch updates to avoid hitting the spotify api rate limit" do
+        spotify_user = create :spotify_user,
+          is_listening: false
+
+        stub_get_playback_request(spotify_user)
+
+        update_double = UpdatePlaybackStates.new(false)
+        allow(update_double).to receive(:sleep)
+        allow(UpdatePlaybackStates).to receive(:new)
+          .with(false)
+          .and_return(update_double)
+
+        allow(Rails).to receive_message_chain(:env, :production?) { true }
+
+        UpdatePlaybackStates.update(listening: false)
+
+        expect(update_double).to have_received(:sleep).with(2)
+      end
     end
 
     it "updates all listening spotify user's playbacks" do
