@@ -4,7 +4,7 @@ class UpdatePlaybackService
   end
 
   def update
-    UpdatePlaybackStates.update
+    UpdatePlaybackStates.update(listening: true)
     UnsyncListenersWhoseBroadcasterStoppedBroadcasting.unsync
     UnsyncListenersWhoStartedANewSong.unsync
     ResyncListenersWhoseBroadcasterStartedANewSong.resync

@@ -2,16 +2,27 @@ require "rufus-scheduler"
 
 EVERY_DAY_AT_MIDNIGHT = "0 0 * * *"
 
-SEVEN_SECONDS = "7s"
+FIVE_SECONDS = "5s"
+TEN_MINUTES = "10m"
 
 scheduler = Rufus::Scheduler.singleton
 
-scheduler.every SEVEN_SECONDS do
+scheduler.every FIVE_SECONDS do
   run do
     if Rails.env.production?
       UpdatePlaybackWorker.perform_async
     else
       UpdatePlaybackWorker.new.perform
+    end
+  end
+end
+
+scheduler.every TEN_MINUTES do
+  run do
+    if Rails.env.production?
+      UpdateInactiveUsersPlaybackWorker.perform_async
+    else
+      UpdateInactiveUsersPlaybackWorker.new.perform
     end
   end
 end

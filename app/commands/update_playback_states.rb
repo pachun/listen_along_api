@@ -1,13 +1,14 @@
 class UpdatePlaybackStates
   NUM_CONCURRENT_UPDATES = 5
 
-  def self.update
-    new.update
+  def self.update(listening:)
+    new(listening).update
   end
 
   attr_accessor :updated_playback_states
 
-  def initialize
+  def initialize(listening)
+    @listening = listening
     @updated_playback_states = []
   end
 
@@ -18,10 +19,13 @@ class UpdatePlaybackStates
 
   private
 
+  attr_reader :listening
+
   def get_updated_playback_states
-    SpotifyApp.concurrently_updatable_spotify_user_batches(
-      batch_size: NUM_CONCURRENT_UPDATES
-    ).each do |updatable_spotify_user_batch|
+    UpdatableUserBatchService
+      .with(batch_size: NUM_CONCURRENT_UPDATES, listening: listening)
+      .each do |updatable_spotify_user_batch|
+
       get_updated_batch_playback_states(updatable_spotify_user_batch)
     end
   end

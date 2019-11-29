@@ -1,8 +1,28 @@
 require "rails_helper"
 
 describe UpdatePlaybackStates do
-  describe "self.update" do
-    it "updates all spotify user's playbacks" do
+  describe "self.update(listening:)" do
+    context "listening is false" do
+      it "updates inactive spotify user's playbacks" do
+        spotify_user = create :spotify_user,
+          is_listening: false
+
+        stub_get_playback_request(
+          spotify_user,
+          is_listening: true,
+          song_artists: ["a1", "a2"],
+          album_url: "album_cover_url",
+        )
+        UpdatePlaybackStates.update(listening: false)
+
+        spotify_user.reload
+
+        expect(spotify_user.song_artists).to eq(["a1", "a2"])
+        expect(spotify_user.song_album_cover_url).to eq("album_cover_url")
+      end
+    end
+
+    it "updates all listening spotify user's playbacks" do
       spotify_user = create :spotify_user,
         is_listening: true
 
@@ -10,8 +30,8 @@ describe UpdatePlaybackStates do
         spotify_user,
         song_artists: ["a1", "a2"],
         album_url: "album_cover_url",
-      ) 
-      UpdatePlaybackStates.update
+      )
+      UpdatePlaybackStates.update(listening: true)
 
       spotify_user.reload
 
@@ -31,7 +51,8 @@ describe UpdatePlaybackStates do
         is_playing: false,
       )
 
-      spotify_user_2 = create :spotify_user
+      spotify_user_2 = create :spotify_user,
+        is_listening: true
       beam_me_up = {
         is_listening: true,
         song_name: "Beam Me Up",
@@ -40,7 +61,7 @@ describe UpdatePlaybackStates do
       }
       stub_get_playback_request(spotify_user_2, beam_me_up)
 
-      UpdatePlaybackStates.update
+      UpdatePlaybackStates.update(listening: true)
 
       spotify_user_1.reload
 
@@ -64,7 +85,7 @@ describe UpdatePlaybackStates do
 
         stub_get_playback_request(spotify_user)
 
-        UpdatePlaybackStates.update
+        UpdatePlaybackStates.update(listening: true)
 
         spotify_user.reload
 
@@ -88,7 +109,7 @@ describe UpdatePlaybackStates do
 
         old_attributes = spotify_user.attributes
 
-        UpdatePlaybackStates.update
+        UpdatePlaybackStates.update(listening: true)
 
         new_attributes = spotify_user.reload.attributes
 
@@ -115,7 +136,7 @@ describe UpdatePlaybackStates do
         num_prior_spotify_api_rate_limit_hits = SpotifyApiRateLimitHit.count
 
         travel_to(time) do
-          UpdatePlaybackStates.update
+          UpdatePlaybackStates.update(listening: true)
         end
 
         expect(SpotifyApiRateLimitHit.count).to(

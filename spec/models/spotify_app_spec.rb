@@ -1,44 +1,47 @@
 require "rails_helper"
 
 describe SpotifyApp do
-  describe ":with_most_spotify_users scope" do
-    it "returns the spotify app with the most spotify users" do
-      app_1 = create :spotify_app
-      create :spotify_user, spotify_app: app_1
+  describe ":with_most_spotify_users(listening) scope" do
+    context "listening is true" do
+      it "returns the spotify app with the most listening spotify users" do
+        app_1 = create :spotify_app
+        create :spotify_user, spotify_app: app_1, is_listening: true
 
-      app_2 = create :spotify_app
+        app_2 = create :spotify_app
 
-      expect(SpotifyApp.with_most_spotify_users).to eq(app_1)
+        expect(SpotifyApp.with_most_spotify_users(listening: true)).to eq(app_1)
 
-      create :spotify_user, spotify_app: app_2
-      create :spotify_user, spotify_app: app_2
+        create :spotify_user, spotify_app: app_2, is_listening: true
+        create :spotify_user, spotify_app: app_2, is_listening: true
 
-      expect(SpotifyApp.with_most_spotify_users).to eq(app_2)
+        expect(SpotifyApp.with_most_spotify_users(listening: true)).to eq(app_2)
+
+        create :spotify_user, spotify_app: app_1, is_listening: false
+        create :spotify_user, spotify_app: app_1, is_listening: false
+
+        expect(SpotifyApp.with_most_spotify_users(listening: true)).to eq(app_2)
+      end
     end
-  end
 
-  describe "self.concurrently_updatable_user_batches(batch_size:)" do
-    it "returns batches of concurrently updatable spotify users" do
-      app_1 = create :spotify_app
-      app_1_users = (0..4).map { create :spotify_user, spotify_app: app_1 }
+    context "listening is false" do
+      it "returns the spotify app with the most inactive spotify users" do
+        app_1 = create :spotify_app
+        create :spotify_user, spotify_app: app_1, is_listening: false
 
-      app_2 = create :spotify_app
-      app_2_users = (0..1).map { create :spotify_user, spotify_app: app_2 }
+        app_2 = create :spotify_app
 
-      create :spotify_app
+        expect(SpotifyApp.with_most_spotify_users(listening: false)).to eq(app_1)
 
-      batches = SpotifyApp
-        .concurrently_updatable_spotify_user_batches(batch_size: 2)
+        create :spotify_user, spotify_app: app_2, is_listening: false
+        create :spotify_user, spotify_app: app_2, is_listening: false
 
-      expect(batches).to eq([[
-        app_1_users[0], app_2_users[0],
-      ], [
-        app_1_users[1], app_2_users[1],
-      ], [
-        app_1_users[2], app_1_users[3],
-      ], [
-        app_1_users[4],
-      ]])
+        expect(SpotifyApp.with_most_spotify_users(listening: false)).to eq(app_2)
+
+        create :spotify_user, spotify_app: app_1, is_listening: true
+        create :spotify_user, spotify_app: app_1, is_listening: true
+
+        expect(SpotifyApp.with_most_spotify_users(listening: false)).to eq(app_2)
+      end
     end
   end
 end

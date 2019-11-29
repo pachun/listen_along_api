@@ -7,7 +7,7 @@ describe UpdatePlaybackService do
 
       UpdatePlaybackService.update
 
-      expect(UpdatePlaybackStates).to have_received(:update)
+      expect(UpdatePlaybackStates).to have_received(:update).with(listening: true)
     end
 
     it "unsyncs listeners whose broadcaster stopped broadcasting" do
