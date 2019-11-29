@@ -110,8 +110,6 @@ describe UpdatePlaybackStates do
         stub_get_playback_request(old_broadcaster)
         stub_get_playback_request_with_rate_limiting(spotify_user)
 
-        old_attributes = spotify_user.attributes
-
         time = DateTime.current
 
         num_prior_spotify_api_rate_limit_hits = SpotifyApiRateLimitHit.count
