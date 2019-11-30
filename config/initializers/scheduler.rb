@@ -30,8 +30,10 @@ end
 scheduler.cron EVERY_DAY_AT_MIDNIGHT do
   run do
     if Rails.env.production?
+      UpdateAvatarsWorker.perform_async
       RefreshExpiredAvatarsWorker.perform_async
     else
+      UpdateAvatarsWorker.new.perform
       RefreshExpiredAvatarsWorker.new.perform
     end
   end
