@@ -3,7 +3,7 @@ require "sidekiq/testing"
 
 Sidekiq::Testing.inline!
 
-describe UpdateInactiveUsersPlaybackWorker do
+describe UpdateInactiveUsersPlaybackWorker, type: :worker do
   it "updates the playback of users who weren't previously listening to spotify" do
     allow(UpdateInactiveUsersPlayback).to receive(:update)
 
