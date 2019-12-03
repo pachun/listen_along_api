@@ -76,17 +76,23 @@ describe SpotifyUser do
         .with(broadcaster: broadcaster)
     end
 
-    it "sets the listeners broadcaster" do
+    it "sets the listeners broadcaster and song information" do
       stub_spotify_service_listen_alongs
 
       listener = create :spotify_user
       broadcaster = create :spotify_user,
-        song_uri: "song_uri"
+        song_uri: "song_uri",
+        song_artists: ["a1", "a2"],
+        song_album_cover_url: "url"
 
       listener.listen_to!(broadcaster)
 
       listener.reload
 
+      expect(listener.song_album_cover_url).to(
+        eq(broadcaster.song_album_cover_url)
+      )
+      expect(listener.song_artists).to eq(broadcaster.song_artists)
       expect(listener.broadcaster).to eq(broadcaster)
       expect(listener.song_uri).to eq(broadcaster.song_uri)
     end

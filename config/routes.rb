@@ -5,8 +5,8 @@ Rails.application.routes.draw do
   resources :spotify_authentication, only: [:index]
 
   resources :spotify_users, only: [:index]
-  resources :feedback, only: [:create]
 
+  get "me", to: "me#index"
   post "listen_along", to: "spotify_users#listen_along"
   put "add_to_library", to: "spotify_users#add_to_library"
 

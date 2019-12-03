@@ -30,6 +30,8 @@ class SpotifyUser < ApplicationRecord
 
   def listen_to!(spotify_user)
     update(
+      song_artists: spotify_user.song_artists,
+      song_album_cover_url: spotify_user.song_album_cover_url,
       broadcaster: spotify_user,
       song_uri: spotify_user.song_uri,
       last_listen_along_at: DateTime.current,

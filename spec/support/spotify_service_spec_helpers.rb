@@ -40,7 +40,7 @@ module SpotifyServiceSpecHelpers
       "https://api.spotify.com/v1/me/player/currently-playing"
     ).with(
       headers: { "Authorization": "Bearer #{spotify_user.access_token}" },
-    ).to_return({ status: 429 }) #hi
+    ).to_return({ status: 429 })
   end
 
   def stub_get_playback_request(spotify_user, overwrites = {})

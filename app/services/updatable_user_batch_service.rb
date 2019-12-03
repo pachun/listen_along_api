@@ -48,7 +48,8 @@ class UpdatableUserBatchService
   end
 
   def app_with_most_users
-    @app_with_most_users ||= SpotifyApp.with_most_spotify_users(listening: listening)
+    @app_with_most_users ||= SpotifyApp
+      .with_most_spotify_users(listening: listening)
   end
 
   def users_by_app
