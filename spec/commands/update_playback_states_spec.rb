@@ -112,6 +112,22 @@ describe UpdatePlaybackStates do
       end
     end
 
+    context "while make requests to update the listening users" do
+      context "a user listened along with someone else" do
+        it "does not change the user's attributes" do
+          spotify_user = create :spotify_user,
+            is_listening: true,
+            updated_at: 5.seconds.from_now
+
+          stub_get_playback_request(spotify_user)
+
+          UpdatePlaybackStates.update(listening: true)
+
+          expect(spotify_user.updated_at).to eq(spotify_user.reload.updated_at)
+        end
+      end
+    end
+
     context "the spotify api rate limit is hit while updating a user" do
       it "does not make any changes to the spotify user" do
         old_broadcaster = create :spotify_user

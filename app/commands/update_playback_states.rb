@@ -13,13 +13,14 @@ class UpdatePlaybackStates
   end
 
   def update
+    @update_requests_began_at = Time.now
     get_updated_playback_states
     update_playback_states
   end
 
   private
 
-  attr_reader :listening
+  attr_reader :listening, :update_requests_began_at
 
   def get_updated_playback_states
     UpdatableUserBatchService
@@ -46,9 +47,12 @@ class UpdatePlaybackStates
 
   def update_playback_states
     updated_playback_states.each do |updated_playback_state|
-      SpotifyUser
+      spotify_user = SpotifyUser
         .find(updated_playback_state[:spotify_user_id])
-        .update(updated_playback_state[:playback_state])
+
+      if spotify_user.updated_at < update_requests_began_at
+        spotify_user.update(updated_playback_state[:playback_state])
+      end
     end
   end
 end
