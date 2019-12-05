@@ -41,14 +41,6 @@ ActiveRecord::Schema.define(version: 2019_09_25_202829) do
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
   end
 
-  create_table "devices", force: :cascade do |t|
-    t.bigint "spotify_user_id"
-    t.string "expo_token"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["spotify_user_id"], name: "index_devices_on_spotify_user_id"
-  end
-
   create_table "registering_spotify_users", force: :cascade do |t|
     t.string "broadcaster_username"
     t.string "identifier"
@@ -87,8 +79,8 @@ ActiveRecord::Schema.define(version: 2019_09_25_202829) do
     t.string "song_uri"
     t.string "millisecond_progress_into_song"
     t.boolean "is_listening", default: false
-    t.string "last_song_uri"
     t.string "listen_along_token"
+    t.string "last_song_uri"
     t.string "display_name"
     t.string "avatar_url"
     t.string "song_album_cover_url"
@@ -100,7 +92,6 @@ ActiveRecord::Schema.define(version: 2019_09_25_202829) do
     t.index ["spotify_user_id"], name: "index_spotify_users_on_spotify_user_id"
   end
 
-  add_foreign_key "devices", "spotify_users"
   add_foreign_key "registering_spotify_users", "spotify_apps"
   add_foreign_key "spotify_api_rate_limit_hits", "spotify_apps"
   add_foreign_key "spotify_api_rate_limit_hits", "spotify_users"
