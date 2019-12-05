@@ -1,1 +1,0 @@
-SpotifyApiRateLimitHit.destroy_all
