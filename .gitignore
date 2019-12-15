@@ -34,3 +34,5 @@ latest.dump
 
 # redis logs
 dump.rdb
+
+.env

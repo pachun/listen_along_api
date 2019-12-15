@@ -1,7 +1,7 @@
 class SpotifyApp < ApplicationRecord
   has_many :spotify_users
 
-  scope :with_most_spotify_users, -> (listening:) {
+  def self.with_most_spotify_users(listening:)
     most_users = 0
     with_most_users = nil
     SpotifyApp.all.each do |spotify_app|
@@ -12,5 +12,5 @@ class SpotifyApp < ApplicationRecord
       end
     end
     with_most_users
-  }
+  end
 end
