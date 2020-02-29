@@ -10,7 +10,7 @@ gem "bootsnap", ">= 1.1.0", require: false
 gem "devise"
 gem "faraday"
 gem "pg"
-gem "puma", "~> 3.11"
+gem "puma", "~> 3.12"
 gem "rack-cors", "~> 1.1.0", :require => "rack/cors"
 gem "rails", "~> 5.2.3"
 gem "redis"
